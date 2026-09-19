@@ -26,7 +26,106 @@ local _ok, _err = pcall(function()
     if not CG then CG = LP:FindFirstChildOfClass("PlayerGui") end
     if not CG then CG = LP:WaitForChild("PlayerGui") end
 
-    for _, n in ipairs({"KhoiFarmKeyUI", "KhoiFarmMainUI", "KhoiFarmNotify"}) do
+    local VALID_KEY = "KhoiFarmVIP"
+    local DISCORD_LINK = "https://discord.gg/psdJJ8JVt"
+    local unlocked = false
+
+    local KeyGui = Instance.new("ScreenGui")
+    KeyGui.Name = "KhoiFarmKeyUI"
+    KeyGui.ResetOnSpawn = false
+    KeyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() KeyGui.IgnoreGuiInset = true end)
+    KeyGui.Parent = CG
+
+    local KeyFrame = Instance.new("Frame", KeyGui)
+    KeyFrame.Size = UDim2.new(0, 300, 0, 180)
+    KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
+    KeyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    KeyFrame.BorderSizePixel = 0
+    Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 10)
+    local KeyStroke = Instance.new("UIStroke", KeyFrame)
+    KeyStroke.Color = Color3.fromRGB(255, 0, 0)
+    KeyStroke.Thickness = 2
+
+    local KeyTitle = Instance.new("TextLabel", KeyFrame)
+    KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+    KeyTitle.BackgroundTransparency = 1
+    KeyTitle.Text = "KhoiFarm Key System"
+    KeyTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+    KeyTitle.Font = Enum.Font.GothamBold
+    KeyTitle.TextSize = 18
+
+    local KeyBox = Instance.new("TextBox", KeyFrame)
+    KeyBox.Size = UDim2.new(1, -40, 0, 35)
+    KeyBox.Position = UDim2.new(0, 20, 0, 50)
+    KeyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KeyBox.PlaceholderText = "Nhập key của bạn..."
+    KeyBox.Font = Enum.Font.Gotham
+    KeyBox.TextSize = 14
+    KeyBox.BorderSizePixel = 0
+    KeyBox.ClearTextOnFocus = false
+    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
+
+    local SubmitBtn = Instance.new("TextButton", KeyFrame)
+    SubmitBtn.Size = UDim2.new(0.5, -30, 0, 35)
+    SubmitBtn.Position = UDim2.new(0, 20, 0, 95)
+    SubmitBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SubmitBtn.Text = "Xác Nhận"
+    SubmitBtn.Font = Enum.Font.GothamBold
+    SubmitBtn.TextSize = 14
+    SubmitBtn.BorderSizePixel = 0
+    Instance.new("UICorner", SubmitBtn).CornerRadius = UDim.new(0, 6)
+
+    local DiscordBtn = Instance.new("TextButton", KeyFrame)
+    DiscordBtn.Size = UDim2.new(0.5, -30, 0, 35)
+    DiscordBtn.Position = UDim2.new(0.5, 10, 0, 95)
+    DiscordBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    DiscordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DiscordBtn.Text = "Lấy Key (Discord)"
+    DiscordBtn.Font = Enum.Font.GothamBold
+    DiscordBtn.TextSize = 14
+    DiscordBtn.BorderSizePixel = 0
+    Instance.new("UICorner", DiscordBtn).CornerRadius = UDim.new(0, 6)
+
+    local StatusLbl = Instance.new("TextLabel", KeyFrame)
+    StatusLbl.Size = UDim2.new(1, -20, 0, 30)
+    StatusLbl.Position = UDim2.new(0, 10, 0, 140)
+    StatusLbl.BackgroundTransparency = 1
+    StatusLbl.Text = ""
+    StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+    StatusLbl.Font = Enum.Font.Gotham
+    StatusLbl.TextSize = 13
+
+    DiscordBtn.MouseButton1Click:Connect(function()
+        if setclipboard then
+            setclipboard(DISCORD_LINK)
+            StatusLbl.Text = "Đã copy link Discord!"
+            StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 100)
+        else
+            StatusLbl.Text = "Executor không hỗ trợ copy!"
+            StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+        end
+    end)
+
+    SubmitBtn.MouseButton1Click:Connect(function()
+        if KeyBox.Text == VALID_KEY then
+            unlocked = true
+            StatusLbl.Text = "Key hợp lệ! Đang tải..."
+            StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 100)
+            task.wait(0.5)
+            KeyGui:Destroy()
+        else
+            StatusLbl.Text = "Key sai hoặc đã hết hạn!"
+            StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+            KeyBox.Text = ""
+        end
+    end)
+
+    while not unlocked do task.wait(0.1) end
+
+    for _, n in ipairs({"KhoiFarmMainUI", "KhoiFarmNotify"}) do
         local o = CG:FindFirstChild(n)
         if o then pcall(function() o:Destroy() end) end
         local pg = LP:FindFirstChild("PlayerGui")
@@ -197,7 +296,6 @@ local _ok, _err = pcall(function()
         end)
     end
 
-    -- ĐÃ FIX LỖI VARARG TẠI ĐÂY
     local function Fire(remote, ...)
         if not remote then return end
         local args = {...}
@@ -1655,6 +1753,6 @@ if not _ok then
             Title = "KhoiFarm LỖI",
             Text = tostring(_err),
             Duration = 10
-        })
+        })pp
     end)
 end
