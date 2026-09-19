@@ -1,0 +1,1758 @@
+local _ok, _err = pcall(function()
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
+    task.wait(0.5)
+
+    local UIS = game:GetService("UserInputService")
+    local RS = game:GetService("RunService")
+    local PL = game:GetService("Players")
+    local RPS = game:GetService("ReplicatedStorage")
+    local SG_svc = game:GetService("StarterGui")
+    local TPS = game:GetService("TeleportService")
+    local LIGHT = game:GetService("Lighting")
+    local HS = game:GetService("HttpService")
+    local LP = PL.LocalPlayer
+    if not LP then
+        repeat task.wait() until PL.LocalPlayer
+        LP = PL.LocalPlayer
+    end
+    if not LP.Character then
+        LP.CharacterAdded:Wait()
+        task.wait(0.5)
+    end
+
+    local CG = LP:WaitForChild("PlayerGui", 10)
+    if not CG then CG = LP:FindFirstChildOfClass("PlayerGui") end
+    if not CG then CG = LP:WaitForChild("PlayerGui") end
+
+    local VALID_KEY = "KhoiFarmVIP"
+    local DISCORD_LINK = "https://discord.gg/psdJJ8JVt"
+    local unlocked = false
+
+    local KeyGui = Instance.new("ScreenGui")
+    KeyGui.Name = "KhoiFarmKeyUI"
+    KeyGui.ResetOnSpawn = false
+    KeyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() KeyGui.IgnoreGuiInset = true end)
+    KeyGui.Parent = CG
+
+    local KeyFrame = Instance.new("Frame", KeyGui)
+    KeyFrame.Size = UDim2.new(0, 300, 0, 180)
+    KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
+    KeyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    KeyFrame.BorderSizePixel = 0
+    Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 10)
+    local KeyStroke = Instance.new("UIStroke", KeyFrame)
+    KeyStroke.Color = Color3.fromRGB(255, 0, 0)
+    KeyStroke.Thickness = 2
+
+    local KeyTitle = Instance.new("TextLabel", KeyFrame)
+    KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+    KeyTitle.BackgroundTransparency = 1
+    KeyTitle.Text = "KhoiFarm Key System"
+    KeyTitle.TextColor3 = Color3.fromRGB(255, 50, 50)
+    KeyTitle.Font = Enum.Font.GothamBold
+    KeyTitle.TextSize = 18
+
+    local KeyBox = Instance.new("TextBox", KeyFrame)
+    KeyBox.Size = UDim2.new(1, -40, 0, 35)
+    KeyBox.Position = UDim2.new(0, 20, 0, 50)
+    KeyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KeyBox.PlaceholderText = "Nhập key của bạn..."
+    KeyBox.Font = Enum.Font.Gotham
+    KeyBox.TextSize = 14
+    KeyBox.BorderSizePixel = 0
+    KeyBox.ClearTextOnFocus = false
+    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
+
+    local SubmitBtn = Instance.new("TextButton", KeyFrame)
+    SubmitBtn.Size = UDim2.new(0.5, -30, 0, 35)
+    SubmitBtn.Position = UDim2.new(0, 20, 0, 95)
+    SubmitBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SubmitBtn.Text = "Xác Nhận"
+    SubmitBtn.Font = Enum.Font.GothamBold
+    SubmitBtn.TextSize = 14
+    SubmitBtn.BorderSizePixel = 0
+    Instance.new("UICorner", SubmitBtn).CornerRadius = UDim.new(0, 6)
+
+    local DiscordBtn = Instance.new("TextButton", KeyFrame)
+    DiscordBtn.Size = UDim2.new(0.5, -30, 0, 35)
+    DiscordBtn.Position = UDim2.new(0.5, 10, 0, 95)
+    DiscordBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    DiscordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DiscordBtn.Text = "Lấy Key (Discord)"
+    DiscordBtn.Font = Enum.Font.GothamBold
+    DiscordBtn.TextSize = 14
+    DiscordBtn.BorderSizePixel = 0
+    Instance.new("UICorner", DiscordBtn).CornerRadius = UDim.new(0, 6)
+
+    local StatusLbl = Instance.new("TextLabel", KeyFrame)
+    StatusLbl.Size = UDim2.new(1, -20, 0, 30)
+    StatusLbl.Position = UDim2.new(0, 10, 0, 140)
+    StatusLbl.BackgroundTransparency = 1
+    StatusLbl.Text = ""
+    StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+    StatusLbl.Font = Enum.Font.Gotham
+    StatusLbl.TextSize = 13
+
+    DiscordBtn.MouseButton1Click:Connect(function()
+        if setclipboard then
+            setclipboard(DISCORD_LINK)
+            StatusLbl.Text = "Đã copy link Discord!"
+            StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 100)
+        else
+            StatusLbl.Text = "Executor không hỗ trợ copy!"
+            StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+        end
+    end)
+
+    SubmitBtn.MouseButton1Click:Connect(function()
+        if KeyBox.Text == VALID_KEY then
+            unlocked = true
+            StatusLbl.Text = "Key hợp lệ! Đang tải..."
+            StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 100)
+            task.wait(0.5)
+            KeyGui:Destroy()
+        else
+            StatusLbl.Text = "Key sai hoặc đã hết hạn!"
+            StatusLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+            KeyBox.Text = ""
+        end
+    end)
+
+    while not unlocked do task.wait(0.1) end
+
+    for _, n in ipairs({"KhoiFarmMainUI", "KhoiFarmNotify"}) do
+        local o = CG:FindFirstChild(n)
+        if o then pcall(function() o:Destroy() end) end
+        local pg = LP:FindFirstChild("PlayerGui")
+        if pg then
+            local o2 = pg:FindFirstChild(n)
+            if o2 then pcall(function() o2:Destroy() end) end
+        end
+    end
+
+    task.wait(0.15)
+
+    local CONNECTIONS = {}
+    local FLAGS = {
+        PunchFarm=false, ToolFarm=false, KillAura=false, KillList=false, Range=25,
+        KillEveryone=false, WhitelistFriends=false, FarmEvilKarma=false, FarmGoodKarma=false,
+        LendDamage=false, LendDamageTarget="",
+        Rebirth=false, AutoRebirthTarget=0, UseRebirthTarget=false,
+        AutoCrystal=false, CrystalName="Blue Crystal", AutoSell=false,
+        AutoUpgradeStrength=false, AutoUpgradeDurability=false, AutoUpgradeAgility=false,
+        AutoGym=false, GymName="Muscle King Gym", AutoCollectGift=false,
+        GiftProtein=false, GiftProteinTarget="", GiftProteinAmount=0,
+        GiftShake=false, GiftShakeTarget="", GiftShakeAmount=0,
+        AutoWeight=false, AutoPushUps=false, AutoSitUps=false, AutoHandstands=false,
+        AutoExercise=false, Exercise="Pushup", Rock="Jungle Rock", AutoRock=false,
+        PushupJungleRock=false, PushupMuscleKingRock=false, PushupLegendsRock=false,
+        AutoLift=false, NaNPlusEgg=false, AutoPunchNoAnim=false,
+        AutoKing=false, AutoBrawl=false, AutoEgg=false, AutoProtein=false,
+        EatAllEggs=false, EatAllBoosts=false, DisableEatingEggs=false,
+        AutoSpinWheel=false,
+        AntiAFK=false, AntiRagdoll=false, AntiFling=false, NoClip=false, WalkWater=false,
+        FullBright=false, RemoveAttackAnim=false, InfiniteJump=false, AutoSprint=false,
+        LockPos=false, SpeedValue=16, JumpPower=50,
+        SkyFarm=false, SkyY=5000, ShowPets=false, ShowOtherPets=false, HideStatFrames=false,
+        ChangeTime="Day",
+        AdminDetect=false, SelectedPlayer="", Spectate=false,
+        AutoFarmLoop=false, FPSBoost=false,
+        SelectedPet="", BuyPet=false, SelectedAura="", BuyAura=false,
+        ToggleKeybind="RightShift", AutoSaveConfig=false,
+    }
+
+    local UNLOADED = false
+    local CONFIG_FILE = "KhoiFarm_Config.json"
+
+    local function SaveConfig()
+        local ok = pcall(function()
+            if type(writefile) ~= "function" then error("writefile not supported") end
+            local data = {}
+            for k, v in pairs(FLAGS) do
+                local t = type(v)
+                if t == "string" or t == "number" or t == "boolean" then
+                    data[k] = v
+                end
+            end
+            writefile(CONFIG_FILE, HS:JSONEncode(data))
+        end)
+        return ok
+    end
+
+    local function LoadConfig()
+        pcall(function()
+            if type(isfile) ~= "function" or type(readfile) ~= "function" then return end
+            if not isfile(CONFIG_FILE) then return end
+            local content = readfile(CONFIG_FILE)
+            if not content or content == "" then return end
+            local data = HS:JSONDecode(content)
+            for k, v in pairs(data) do
+                if FLAGS[k] ~= nil then FLAGS[k] = v end
+            end
+        end)
+    end
+
+    local function DeleteConfig()
+        pcall(function()
+            if type(delfile) == "function" and type(isfile) == "function" and isfile(CONFIG_FILE) then
+                delfile(CONFIG_FILE)
+            end
+        end)
+    end
+
+    local function track(c)
+        if c then table.insert(CONNECTIONS, c) end
+        return c
+    end
+
+    local function disconnectAll()
+        for _, c in ipairs(CONNECTIONS) do
+            pcall(function() c:Disconnect() end)
+        end
+        CONNECTIONS = {}
+    end
+
+    local function DeepFind(p, name)
+        local f = p:FindFirstChild(name)
+        if f then return f end
+        for _, v in pairs(p:GetDescendants()) do
+            if v.Name == name then return v end
+        end
+    end
+
+    local function GetREvents() return RPS:FindFirstChild("rEvents") end
+    local _cache = {}
+
+    local function ResolveRemote(key, candidates)
+        if _cache[key] and _cache[key].Parent then return _cache[key] end
+        local r = GetREvents()
+        if r then
+            for _, n in ipairs(candidates) do
+                local f = r:FindFirstChild(n)
+                if f then _cache[key] = f; return f end
+            end
+        end
+        for _, n in ipairs(candidates) do
+            local f = DeepFind(RPS, n)
+            if f then _cache[key] = f; return f end
+        end
+        return nil
+    end
+
+    local function GetMuscleEvent() return ResolveRemote("muscle", {"muscleEvent", "MuscleEvent", "Muscle"}) end
+    local function GetPetRemote() return ResolveRemote("pet", {"buyPetEvent", "petEvent", "equipPetEvent", "PetEvent"}) end
+    local function GetAuraRemote() return ResolveRemote("aura", {"buyAuraEvent", "auraEvent", "AuraEvent"}) end
+    local function GetEggRemote() return ResolveRemote("egg", {"eatEggEvent", "eggEvent", "EggEvent"}) end
+    local function GetWheelRemote() return ResolveRemote("wheel", {"spinWheelEvent", "fortuneWheelEvent", "SpinWheel"}) end
+    local function GetTimeRemote() return ResolveRemote("time", {"changeTimeEvent", "setTimeEvent", "ChangeTime"}) end
+    local function GetGiftPlayerRemote() return ResolveRemote("giftPlayer", {"giftPlayerEvent", "sendGiftEvent"}) end
+    local function GetRebirthRemote() return ResolveRemote("rebirth", {"rebirthRemote", "RebirthRemote", "rebirthEvent"}) end
+    local function GetCrystalRemote() return ResolveRemote("crystal", {"openCrystalRemote", "crystalEvent", "openCrystal"}) end
+    local function GetSellRemote() return ResolveRemote("sell", {"sellAllEvent", "sellEvent", "sellAllRemote", "sellPetEvent"}) end
+    local function GetUpgradeRemote() return ResolveRemote("upgrade", {"upgradeEvent", "upgradeRemote", "upgradeStatEvent", "upgrade"}) end
+    local function GetGymRemote() return ResolveRemote("gym", {"changeGymEvent", "changeCurrentGymEvent", "changeGymRemote"}) end
+    local function GetGiftRemote() return ResolveRemote("gift", {"collectGiftEvent", "giftEvent"}) end
+
+    local function GetChar() return LP.Character end
+    local function GetHRP()
+        local c = GetChar()
+        return c and c:FindFirstChild("HumanoidRootPart")
+    end
+    local function GetHum()
+        local c = GetChar()
+        return c and c:FindFirstChildOfClass("Humanoid")
+    end
+
+    local function GetPlayerFromName(n)
+        n = tostring(n or "")
+        for _, p in ipairs(PL:GetPlayers()) do
+            if p.Name:lower() == n:lower() or p.DisplayName:lower() == n:lower() then
+                return p
+            end
+        end
+    end
+
+    local function GetRootOfPlayer(p)
+        if not p or not p.Character then return nil end
+        return p.Character:FindFirstChild("HumanoidRootPart")
+    end
+
+    local function IsFriend(p)
+        if not p or p == LP then return false end
+        local ok, result = pcall(function() return LP:IsFriendsWith(p.UserId) end)
+        return ok and result
+    end
+
+    local function Notify(text)
+        pcall(function()
+            SG_svc:SetCore("SendNotification", {
+                Title = "KhoiFarm", Text = tostring(text), Duration = 3
+            })
+        end)
+    end
+
+    local function Fire(remote, ...)
+        if not remote then return end
+        local args = {...}
+        pcall(function()
+            if remote:IsA("RemoteFunction") then
+                remote:InvokeServer(table.unpack(args))
+            else
+                remote:FireServer(table.unpack(args))
+            end
+        end)
+    end
+
+    local function MakeDraggable(frame)
+        local dragging = false
+        local startPos, startFramePos
+        track(frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                startPos = input.Position
+                startFramePos = frame.Position
+            end
+        end))
+        track(frame.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end))
+        track(UIS.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - startPos
+                frame.Position = UDim2.new(
+                    startFramePos.X.Scale, startFramePos.X.Offset + delta.X,
+                    startFramePos.Y.Scale, startFramePos.Y.Offset + delta.Y
+                )
+            end
+        end))
+    end
+
+    local _fpsOriginals = { HiddenObjects = {}, DisabledParts = {} }
+    local _fpsEnabled = false
+
+    local function EnableFPSBoost()
+        if _fpsEnabled then return end
+        _fpsEnabled = true
+        pcall(function()
+            _fpsOriginals.GlobalShadows = LIGHT.GlobalShadows
+            _fpsOriginals.FogEnd = LIGHT.FogEnd
+            _fpsOriginals.Brightness = LIGHT.Brightness
+
+            LIGHT.GlobalShadows = false
+            LIGHT.FogEnd = 100000
+            LIGHT.Brightness = 2
+
+            for _, v in ipairs(LIGHT:GetChildren()) do
+                if v:IsA("Atmosphere") or v:IsA("Clouds") then
+                    table.insert(_fpsOriginals.HiddenObjects, v)
+                    v.Parent = nil
+                end
+            end
+            for _, v in ipairs(LIGHT:GetChildren()) do
+                if v:IsA("PostEffect") then
+                    table.insert(_fpsOriginals.DisabledParts, {obj=v, prop="Enabled", val=v.Enabled})
+                    v.Enabled = false
+                end
+            end
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail")
+                or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                    table.insert(_fpsOriginals.DisabledParts, {obj=v, prop="Enabled", val=v.Enabled})
+                    v.Enabled = false
+                end
+            end
+        end)
+    end
+
+    local function DisableFPSBoost()
+        if not _fpsEnabled then return end
+        _fpsEnabled = false
+        pcall(function()
+            if _fpsOriginals.GlobalShadows ~= nil then
+                LIGHT.GlobalShadows = _fpsOriginals.GlobalShadows
+            end
+            if _fpsOriginals.FogEnd ~= nil then
+                LIGHT.FogEnd = _fpsOriginals.FogEnd
+            end
+            if _fpsOriginals.Brightness ~= nil and not FLAGS.FullBright then
+                LIGHT.Brightness = _fpsOriginals.Brightness
+            end
+
+            for _, v in ipairs(_fpsOriginals.HiddenObjects) do
+                pcall(function()
+                    if v and v.Parent == nil then v.Parent = LIGHT end
+                end)
+            end
+            for _, entry in ipairs(_fpsOriginals.DisabledParts) do
+                pcall(function()
+                    if entry.obj and entry.obj.Parent ~= nil then
+                        entry.obj[entry.prop] = entry.val
+                    end
+                end)
+            end
+            _fpsOriginals.HiddenObjects = {}
+            _fpsOriginals.DisabledParts = {}
+        end)
+    end
+
+    track(RS.Heartbeat:Connect(function()
+        if not FLAGS.SkyFarm then return end
+        local h = GetHRP()
+        if h and math.abs(h.Position.Y - FLAGS.SkyY) > 5 then
+            pcall(function()
+                h.CFrame = CFrame.new(h.Position.X, FLAGS.SkyY, h.Position.Z)
+                h.Velocity = Vector3.new(0, 0, 0)
+            end)
+        end
+    end))
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AdminDetect then
+                for _, p in ipairs(PL:GetPlayers()) do
+                    if p ~= LP then
+                        local ok, rank = pcall(function() return p:GetRankInGroup(4112344) end)
+                        if ok and rank and rank > 0 then
+                            Notify("Admin: "..p.Name.." - Rejoin!")
+                            pcall(function() TPS:Teleport(game.PlaceId) end)
+                            break
+                        end
+                    end
+                end
+            end
+            task.wait(8)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            pcall(function()
+                local m = GetMuscleEvent()
+                if m then
+                    if FLAGS.AutoPushUps then Fire(m, "pushUp", "leftHand") end
+                    if FLAGS.AutoSitUps then Fire(m, "sitUp", "leftHand") end
+                    if FLAGS.AutoHandstands then Fire(m, "handstand", "leftHand") end
+                    if FLAGS.AutoWeight then Fire(m, "punch", FLAGS.Rock) end
+                    if FLAGS.AutoExercise then Fire(m, FLAGS.Exercise, "leftHand") end
+                    if FLAGS.AutoRock then Fire(m, "punch", FLAGS.Rock) end
+                    if FLAGS.PushupJungleRock then
+                        Fire(m, "pushUp", "leftHand")
+                        Fire(m, "punch", "Jungle Rock")
+                    end
+                    if FLAGS.PushupMuscleKingRock then
+                        Fire(m, "pushUp", "leftHand")
+                        Fire(m, "punch", "Muscle King Rock")
+                    end
+                    if FLAGS.PushupLegendsRock then
+                        Fire(m, "pushUp", "leftHand")
+                        Fire(m, "punch", "Legends Rock")
+                    end
+                    if FLAGS.AutoPunchNoAnim then
+                        Fire(m, "punch", "leftHand")
+                        Fire(m, "punch", "rightHand")
+                    end
+                    if FLAGS.AutoLift then Fire(m, "autoLift") end
+                    if FLAGS.NaNPlusEgg then Fire(m, "nanEgg") end
+                end
+            end)
+            task.wait(0.15)
+        end
+    end)
+
+    task.spawn(function()
+        local actions = {"pushUp", "sitUp", "handstand", "punch"}
+        local idx = 1
+        local lastAct = 0
+        while not UNLOADED do
+            if FLAGS.AutoFarmLoop then
+                if tick() - lastAct > 0.4 then
+                    lastAct = tick()
+                    local m = GetMuscleEvent()
+                    if m then
+                        local act = actions[idx]
+                        if act == "punch" then
+                            Fire(m, "punch", FLAGS.Rock)
+                        else
+                            Fire(m, act, "leftHand")
+                        end
+                        idx = idx + 1
+                        if idx > #actions then idx = 1 end
+                    end
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.Rebirth then
+                pcall(function()
+                    local r = GetRebirthRemote()
+                    if r then
+                        if FLAGS.UseRebirthTarget and FLAGS.AutoRebirthTarget > 0 then
+                            Fire(r, FLAGS.AutoRebirthTarget)
+                        else
+                            Fire(r)
+                        end
+                    end
+                end)
+            end
+            task.wait(5)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoCrystal then
+                pcall(function()
+                    local r = GetCrystalRemote()
+                    if r then Fire(r, FLAGS.CrystalName) end
+                end)
+            end
+            task.wait(3)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoSell then
+                pcall(function()
+                    local r = GetSellRemote()
+                    if r then Fire(r) end
+                end)
+            end
+            task.wait(5)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoUpgradeStrength or FLAGS.AutoUpgradeDurability or FLAGS.AutoUpgradeAgility then
+                pcall(function()
+                    local r = GetUpgradeRemote()
+                    if r then
+                        if FLAGS.AutoUpgradeStrength then Fire(r, "Strength") end
+                        if FLAGS.AutoUpgradeDurability then Fire(r, "Durability") end
+                        if FLAGS.AutoUpgradeAgility then Fire(r, "Agility") end
+                    end
+                end)
+            end
+            task.wait(2)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoGym then
+                pcall(function()
+                    local r = GetGymRemote()
+                    if r then Fire(r, FLAGS.GymName) end
+                end)
+            end
+            task.wait(10)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoCollectGift then
+                pcall(function()
+                    local r = GetGiftRemote()
+                    if r then Fire(r) end
+                end)
+            end
+            task.wait(15)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoEgg then
+                pcall(function()
+                    local m = GetMuscleEvent()
+                    if m then Fire(m, "autoEgg") end
+                end)
+            end
+            task.wait(30 * 60)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoKing then
+                pcall(function()
+                    local m = GetMuscleEvent()
+                    if m then Fire(m, "autoKing") end
+                end)
+            end
+            task.wait(10)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoBrawl then
+                pcall(function()
+                    local m = GetMuscleEvent()
+                    if m then Fire(m, "joinBrawl") end
+                end)
+            end
+            task.wait(3)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoProtein then
+                pcall(function()
+                    local bp = LP:FindFirstChild("Backpack")
+                    local char = GetChar()
+                    if bp and char then
+                        for _, v in ipairs(bp:GetChildren()) do
+                            if v:IsA("Tool") and v.Name:lower():find("protein") then
+                                v.Parent = char
+                                task.wait(0.1)
+                                pcall(function() v:Activate() end)
+                                break
+                            end
+                        end
+                    end
+                end)
+            end
+            task.wait(5)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.EatAllEggs then
+                pcall(function()
+                    local bp = LP:FindFirstChild("Backpack")
+                    local char = GetChar()
+                    if bp and char and not FLAGS.DisableEatingEggs then
+                        for _, v in ipairs(bp:GetChildren()) do
+                            if v:IsA("Tool") and (v.Name:lower():find("egg") or v.Name:lower():find("boost")) then
+                                v.Parent = char
+                                task.wait(0.05)
+                                pcall(function() v:Activate() end)
+                            end
+                        end
+                    end
+                    local m = GetMuscleEvent()
+                    if m then Fire(m, "eatAllEggs") end
+                end)
+            end
+            if FLAGS.EatAllBoosts then
+                pcall(function()
+                    local er = GetEggRemote()
+                    if er then Fire(er, "allBoosts") end
+                end)
+            end
+            task.wait(3)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.BuyPet and FLAGS.SelectedPet ~= "" then
+                pcall(function()
+                    local r = GetPetRemote()
+                    if r then Fire(r, "buy", FLAGS.SelectedPet) end
+                end)
+            end
+            if FLAGS.BuyAura and FLAGS.SelectedAura ~= "" then
+                pcall(function()
+                    local r = GetAuraRemote()
+                    if r then Fire(r, "buy", FLAGS.SelectedAura) end
+                end)
+            end
+            task.wait(2)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.GiftProtein and FLAGS.GiftProteinTarget ~= "" then
+                pcall(function()
+                    local r = GetGiftPlayerRemote()
+                    if r then Fire(r, "protein", FLAGS.GiftProteinTarget, FLAGS.GiftProteinAmount) end
+                end)
+            end
+            if FLAGS.GiftShake and FLAGS.GiftShakeTarget ~= "" then
+                pcall(function()
+                    local r = GetGiftPlayerRemote()
+                    if r then Fire(r, "shake", FLAGS.GiftShakeTarget, FLAGS.GiftShakeAmount) end
+                end)
+            end
+            task.wait(3)
+        end
+    end)
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.AutoSpinWheel then
+                pcall(function()
+                    local r = GetWheelRemote()
+                    if r then Fire(r) end
+                end)
+            end
+            task.wait(30)
+        end
+    end)
+
+    task.spawn(function()
+        local lastTime = ""
+        while not UNLOADED do
+            if FLAGS.ChangeTime ~= lastTime then
+                lastTime = FLAGS.ChangeTime
+                pcall(function()
+                    local r = GetTimeRemote()
+                    if r then Fire(r, FLAGS.ChangeTime) end
+                    if FLAGS.ChangeTime == "Day" then LIGHT.ClockTime = 14
+                    elseif FLAGS.ChangeTime == "Night" then LIGHT.ClockTime = 0
+                    elseif FLAGS.ChangeTime == "Sunset" then LIGHT.ClockTime = 18
+                    end
+                end)
+            end
+            task.wait(1)
+        end
+    end)
+
+    track(RS.Stepped:Connect(function()
+        if not FLAGS.WalkWater then return end
+        local h = GetHRP()
+        if h and h.Position.Y < 1 then
+            pcall(function() h.CFrame = CFrame.new(h.Position.X, 2, h.Position.Z) end)
+        end
+    end))
+
+    track(RS.Heartbeat:Connect(function()
+        if not FLAGS.AntiRagdoll then return end
+        local hum = GetHum()
+        if hum then
+            pcall(function()
+                hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+            end)
+        end
+    end))
+
+    local lastFlingApply = 0
+    track(RS.Heartbeat:Connect(function()
+        if not FLAGS.AntiFling then return end
+        if tick() - lastFlingApply < 0.5 then return end
+        lastFlingApply = tick()
+        pcall(function()
+            local char = GetChar()
+            if char then
+                for _, v in ipairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5, 1, 1)
+                    end
+                end
+            end
+        end)
+    end))
+
+    track(RS.Stepped:Connect(function()
+        if not FLAGS.NoClip then return end
+        local c = GetChar()
+        if c then
+            for _, v in ipairs(c:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end))
+
+    local _origLight
+    track(RS.Heartbeat:Connect(function()
+        if FLAGS.FullBright then
+            if not _origLight then
+                _origLight = {
+                    Brightness = LIGHT.Brightness, ClockTime = LIGHT.ClockTime,
+                    FogEnd = LIGHT.FogEnd, Ambient = LIGHT.Ambient
+                }
+            end
+            LIGHT.Brightness = 3
+            LIGHT.FogEnd = 100000
+            LIGHT.Ambient = Color3.fromRGB(178, 178, 178)
+        elseif _origLight then
+            for k, v in pairs(_origLight) do LIGHT[k] = v end
+            _origLight = nil
+        end
+    end))
+
+    local _statFrameOriginals = {}
+    task.spawn(function()
+        while not UNLOADED do
+            pcall(function()
+                local pg = LP:FindFirstChild("PlayerGui")
+                if FLAGS.HideStatFrames then
+                    if pg then
+                        for _, v in ipairs(pg:GetDescendants()) do
+                            if (v:IsA("BillboardGui") or v:IsA("SurfaceGui"))
+                            and v.Name:lower():find("stat") then
+                                if _statFrameOriginals[v] == nil then
+                                    _statFrameOriginals[v] = v.Enabled
+                                end
+                                v.Enabled = false
+                            end
+                        end
+                    end
+                else
+                    for v, orig in pairs(_statFrameOriginals) do
+                        pcall(function()
+                            if v and v.Parent then v.Enabled = orig end
+                        end)
+                    end
+                    _statFrameOriginals = {}
+                end
+            end)
+            task.wait(1)
+        end
+    end)
+
+    local _petOriginals = {}
+    task.spawn(function()
+        while not UNLOADED do
+            pcall(function()
+                for _, p in ipairs(PL:GetPlayers()) do
+                    if p.Character then
+                        for _, v in ipairs(p.Character:GetChildren()) do
+                            if v:IsA("Model") and (v.Name:lower():find("pet") or v.Name:lower():find("companion")) then
+                                local isMine = (p == LP)
+                                local show = (isMine and FLAGS.ShowPets) or ((not isMine) and FLAGS.ShowOtherPets)
+                                for _, part in ipairs(v:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        if _petOriginals[part] == nil then
+                                            _petOriginals[part] = part.Transparency
+                                        end
+                                        local orig = _petOriginals[part]
+                                        pcall(function()
+                                            if show then
+                                                part.Transparency = orig
+                                            else
+                                                part.Transparency = 1
+                                            end
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            task.wait(1)
+        end
+    end)
+
+    track(RS.Heartbeat:Connect(function()
+        if not FLAGS.RemoveAttackAnim then return end
+        pcall(function()
+            local c = GetChar()
+            if c then
+                local anim = c:FindFirstChildOfClass("Animator")
+                if anim then
+                    for _, t in ipairs(anim:GetPlayingAnimationTracks()) do
+                        if t.Name:lower():find("punch") or t.Name:lower():find("attack") then
+                            t:Stop()
+                        end
+                    end
+                end
+            end
+        end)
+    end))
+
+    track(RS.Heartbeat:Connect(function()
+        if not FLAGS.Spectate then return end
+        local p = GetPlayerFromName(FLAGS.SelectedPlayer)
+        if p and p.Character then
+            local th = GetRootOfPlayer(p)
+            local cam = workspace.CurrentCamera
+            if th and cam then
+                pcall(function() cam.CFrame = CFrame.new(th.Position + Vector3.new(0, 5, 10), th.Position) end)
+            end
+        end
+    end))
+
+    task.spawn(function()
+        while not UNLOADED do
+            if FLAGS.LendDamage and FLAGS.LendDamageTarget ~= "" then
+                pcall(function()
+                    local target = GetPlayerFromName(FLAGS.LendDamageTarget)
+                    if target and target.Character then
+                        local trp = target.Character:FindFirstChild("HumanoidRootPart")
+                        local myrp = GetHRP()
+                        if trp and myrp then
+                            local dist = (myrp.Position - trp.Position).Magnitude
+                            if dist < 30 then
+                                local m = GetMuscleEvent()
+                                if m then
+                                    Fire(m, "punch", "leftHand")
+                                    Fire(m, "punch", "rightHand")
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+            task.wait(0.1)
+        end
+    end)
+
+    local lastTool = 0
+    local function ToolFarm()
+        if not FLAGS.ToolFarm then return end
+        if tick() - lastTool < 0.15 then return end
+        lastTool = tick()
+        local char = GetChar()
+        if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0 then return end
+        local equipped = nil
+        for _, v in ipairs(char:GetChildren()) do
+            if v:IsA("Tool") then equipped = v; break end
+        end
+        if not equipped then
+            local bp = LP:FindFirstChild("Backpack")
+            if bp then
+                for _, v in ipairs(bp:GetChildren()) do
+                    if v:IsA("Tool") then
+                        pcall(function() hum:EquipTool(v) end)
+                        return
+                    end
+                end
+            end
+            return
+        end
+        pcall(function() equipped:Activate() end)
+    end
+
+    local lastPunch = 0
+    local function PunchFarm()
+        if not FLAGS.PunchFarm then return end
+        if tick() - lastPunch < 0.1 then return end
+        lastPunch = tick()
+        local hum = GetHum()
+        if not hum or hum.Health <= 0 then return end
+        local m = GetMuscleEvent()
+        if not m then return end
+        Fire(m, "punch", "leftHand")
+        Fire(m, "punch", "rightHand")
+    end
+
+    local lastKill = 0
+    local function KillAura()
+        if not (FLAGS.KillAura or FLAGS.KillList or FLAGS.KillEveryone
+        or FLAGS.FarmEvilKarma or FLAGS.FarmGoodKarma) then return end
+        if tick() - lastKill < 0.08 then return end
+        lastKill = tick()
+        local h = GetHRP()
+        if not h then return end
+        local m = GetMuscleEvent()
+        if not m then return end
+        if FLAGS.KillEveryone then
+            Fire(m, "punch", "leftHand")
+            Fire(m, "punch", "rightHand")
+            return
+        end
+        for _, p in ipairs(PL:GetPlayers()) do
+            if p ~= LP and p.Character then
+                local skip = false
+                if FLAGS.WhitelistFriends and IsFriend(p) then skip = true end
+                if not skip then
+                    local th = p.Character:FindFirstChild("HumanoidRootPart")
+                    local hm = p.Character:FindFirstChildOfClass("Humanoid")
+                    if th and hm and hm.Health > 0 then
+                        local d = (h.Position - th.Position).Magnitude
+                        local should = false
+                        if FLAGS.KillList and d < 20 then should = true end
+                        if FLAGS.KillAura and d < FLAGS.Range then should = true end
+                        if (FLAGS.FarmEvilKarma or FLAGS.FarmGoodKarma) and d < 30 then should = true end
+                        if should then
+                            Fire(m, "punch", "leftHand")
+                            Fire(m, "punch", "rightHand")
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    local antiAfkConn
+    local function StartAntiAFK()
+        if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
+        antiAfkConn = track(LP.Idled:Connect(function()
+            if not FLAGS.AntiAFK then return end
+            pcall(function()
+                local vu = game:GetService("VirtualUser")
+                vu:CaptureController()
+                vu:ClickButton2(Vector2.new())
+            end)
+        end))
+    end
+
+    local function DumpRemotes()
+        print("=========== REMOTE LIST ===========")
+        local count = 0
+        for _, v in pairs(RPS:GetDescendants()) do
+            if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+                count = count + 1
+                print("["..v.ClassName.."] "..v:GetFullName())
+            end
+        end
+        print("Total: "..count)
+        Notify("Da in "..count.." remote vao F9!")
+    end
+
+    local function DumpTools()
+        print("=========== TOOL LIST ===========")
+        local bp = LP:FindFirstChild("Backpack")
+        if bp then
+            for _, v in pairs(bp:GetChildren()) do
+                if v:IsA("Tool") then print("[Bag] "..v.Name) end
+            end
+        end
+        local char = GetChar()
+        if char then
+            for _, v in pairs(char:GetChildren()) do
+                if v:IsA("Tool") then print("[Equipped] "..v.Name) end
+            end
+        end
+        Notify("Da in Tool vao F9!")
+    end
+
+    local Main, Mini
+
+    local function MakeUI()
+        local SG = Instance.new("ScreenGui")
+        SG.Name = "KhoiFarmMainUI"
+        SG.ResetOnSpawn = false
+        SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        SG.DisplayOrder = 999
+        pcall(function() SG.IgnoreGuiInset = true end)
+        SG.Parent = CG
+
+        local function DoUnload()
+            if UNLOADED then return end
+            UNLOADED = true
+            if FLAGS.AutoSaveConfig then pcall(SaveConfig) end
+            DisableFPSBoost()
+            disconnectAll()
+            if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
+            local h = GetHRP()
+            if h then
+                pcall(function() h.CustomPhysicalProperties = nil end)
+                pcall(function() h.Anchored = false end)
+            end
+            local hum = GetHum()
+            if hum then hum.WalkSpeed = 16 end
+            pcall(function() SG:Destroy() end)
+        end
+
+        Main = Instance.new("Frame")
+        Main.Size = UDim2.new(0, 660, 0, 480)
+        Main.Position = UDim2.new(0.5, -330, 0.5, -240)
+        Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        Main.BorderSizePixel = 0
+        Main.Active = true
+        Main.Parent = SG
+        Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+        local MS = Instance.new("UIStroke", Main)
+        MS.Color = Color3.fromRGB(255, 0, 0)
+        MS.Thickness = 2
+        MakeDraggable(Main)
+
+        local TB = Instance.new("Frame", Main)
+        TB.Size = UDim2.new(1, 0, 0, 40)
+        TB.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+        TB.BorderSizePixel = 0
+        Instance.new("UICorner", TB).CornerRadius = UDim.new(0, 10)
+
+        local TL = Instance.new("TextLabel", TB)
+        TL.Size = UDim2.new(1, -220, 1, 0)
+        TL.Position = UDim2.new(0, 15, 0, 0)
+        TL.BackgroundTransparency = 1
+        TL.Text = "KhoiFarm v3.3 | Main"
+        TL.TextColor3 = Color3.fromRGB(255, 50, 50)
+        TL.Font = Enum.Font.GothamBold
+        TL.TextSize = 18
+        TL.TextXAlignment = Enum.TextXAlignment.Left
+
+        local function mkBtn(par, size, pos, txt, col)
+            local b = Instance.new("TextButton", par)
+            b.Size = size
+            b.Position = pos
+            b.BackgroundColor3 = col
+            b.TextColor3 = Color3.fromRGB(255, 255, 255)
+            b.Text = txt
+            b.Font = Enum.Font.GothamBold
+            b.TextSize = 12
+            b.BorderSizePixel = 0
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+            return b
+        end
+
+        local UBtn = mkBtn(TB, UDim2.new(0, 60, 0, 30), UDim2.new(1, -205, 0, 5), "UNLOAD", Color3.fromRGB(80, 0, 0))
+        local SBtn = mkBtn(TB, UDim2.new(0, 40, 0, 30), UDim2.new(1, -140, 0, 5), "SAVE", Color3.fromRGB(0, 80, 0))
+        local XBtn = mkBtn(TB, UDim2.new(0, 30, 0, 30), UDim2.new(1, -40, 0, 5), "X", Color3.fromRGB(60, 0, 0))
+        local MBtn = mkBtn(TB, UDim2.new(0, 30, 0, 30), UDim2.new(1, -75, 0, 5), "-", Color3.fromRGB(60, 0, 0))
+
+        local SB = Instance.new("ScrollingFrame", Main)
+        SB.Size = UDim2.new(0, 140, 1, -50)
+        SB.Position = UDim2.new(0, 5, 0, 45)
+        SB.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        SB.BorderSizePixel = 0
+        SB.ScrollBarThickness = 4
+        SB.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
+        SB.CanvasSize = UDim2.new(0, 0, 0, 0)
+        pcall(function() SB.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
+        Instance.new("UICorner", SB).CornerRadius = UDim.new(0, 6)
+
+        local sbLay = Instance.new("UIListLayout", SB)
+        sbLay.SortOrder = Enum.SortOrder.LayoutOrder
+        sbLay.Padding = UDim.new(0, 6)
+
+        local sbPad = Instance.new("UIPadding", SB)
+        sbPad.PaddingTop = UDim.new(0, 5)
+        sbPad.PaddingBottom = UDim.new(0, 5)
+        sbPad.PaddingLeft = UDim.new(0, 5)
+        sbPad.PaddingRight = UDim.new(0, 5)
+
+        local CT = Instance.new("Frame", Main)
+        CT.Size = UDim2.new(1, -155, 1, -50)
+        CT.Position = UDim2.new(0, 150, 0, 45)
+        CT.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        CT.BorderSizePixel = 0
+        CT.ClipsDescendants = false
+        Instance.new("UICorner", CT).CornerRadius = UDim.new(0, 6)
+
+        Mini = Instance.new("Frame", SG)
+        Mini.Size = UDim2.new(0, 115, 0, 45)
+        Mini.Position = UDim2.new(0, 15, 0, 15)
+        Mini.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        Mini.BorderSizePixel = 0
+        Mini.Visible = false
+        Mini.Active = true
+        Instance.new("UICorner", Mini).CornerRadius = UDim.new(0, 10)
+        local MiniS = Instance.new("UIStroke", Mini)
+        MiniS.Color = Color3.fromRGB(255, 0, 0)
+        MiniS.Thickness = 2
+        MakeDraggable(Mini)
+
+        local MiniL = Instance.new("TextLabel", Mini)
+        MiniL.Size = UDim2.new(0.6, 0, 1, 0)
+        MiniL.Position = UDim2.new(0.05, 0, 0, 0)
+        MiniL.BackgroundTransparency = 1
+        MiniL.Text = "Khoi"
+        MiniL.TextColor3 = Color3.fromRGB(255, 50, 50)
+        MiniL.Font = Enum.Font.GothamBold
+        MiniL.TextSize = 20
+        MiniL.TextXAlignment = Enum.TextXAlignment.Left
+
+        local PBtn = Instance.new("TextButton", Mini)
+        PBtn.Size = UDim2.new(0.28, 0, 0.6, 0)
+        PBtn.Position = UDim2.new(0.68, 0, 0.2, 0)
+        PBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+        PBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        PBtn.Text = "+"
+        PBtn.Font = Enum.Font.GothamBold
+        PBtn.TextSize = 20
+        PBtn.BorderSizePixel = 0
+
+        MBtn.MouseButton1Click:Connect(function()
+            Main.Visible = false; Mini.Visible = true
+        end)
+        PBtn.MouseButton1Click:Connect(function()
+            Main.Visible = true; Mini.Visible = false
+        end)
+        XBtn.MouseButton1Click:Connect(DoUnload)
+        UBtn.MouseButton1Click:Connect(function()
+            DoUnload()
+            Notify("Da unload KhoiFarm.")
+        end)
+        SBtn.MouseButton1Click:Connect(function()
+            if SaveConfig() then Notify("Da luu config!")
+            else Notify("Luu config that bai!") end
+        end)
+
+        local Tabs = {}
+
+        local function NewTab(name)
+            local btn = Instance.new("TextButton", SB)
+            btn.Size = UDim2.new(1, 0, 0, 30)
+            btn.BackgroundColor3 = Color3.fromRGB(35, 0, 0)
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.Text = name
+            btn.Font = Enum.Font.Gotham
+            btn.TextSize = 13
+            btn.BorderSizePixel = 0
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+            local page = Instance.new("ScrollingFrame", CT)
+            page.Size = UDim2.new(1, 0, 1, 0)
+            page.BackgroundTransparency = 1
+            page.BorderSizePixel = 0
+            page.ScrollBarThickness = 4
+            page.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
+            page.CanvasSize = UDim2.new(0, 0, 0, 0)
+            page.ClipsDescendants = true
+            pcall(function() page.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
+            page.Visible = false
+
+            local lay = Instance.new("UIListLayout", page)
+            lay.SortOrder = Enum.SortOrder.LayoutOrder
+            lay.Padding = UDim.new(0, 6)
+
+            local pad = Instance.new("UIPadding", page)
+            pad.PaddingTop = UDim.new(0, 8)
+            pad.PaddingBottom = UDim.new(0, 8)
+            pad.PaddingLeft = UDim.new(0, 8)
+            pad.PaddingRight = UDim.new(0, 8)
+
+            local tab = { Btn = btn, Page = page, SO = 0 }
+
+            local function Select()
+                for _, t in pairs(Tabs) do
+                    t.Page.Visible = false
+                    t.Btn.BackgroundColor3 = Color3.fromRGB(35, 0, 0)
+                end
+                page.Visible = true
+                btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                TL.Text = "KhoiFarm v3.3 | "..name
+            end
+
+            track(btn.MouseButton1Click:Connect(Select))
+            table.insert(Tabs, tab)
+            if #Tabs == 1 then Select() end
+
+            function tab.NewSection(sname)
+                tab.SO = tab.SO + 1
+                local mso = tab.SO
+                local sf = Instance.new("Frame", page)
+                sf.Size = UDim2.new(1, 0, 0, 26)
+                sf.BackgroundTransparency = 1
+                sf.LayoutOrder = mso * 1000
+                local sl = Instance.new("TextLabel", sf)
+                sl.Size = UDim2.new(1, 0, 1, 0)
+                sl.BackgroundTransparency = 1
+                sl.Text = "> "..sname
+                sl.TextColor3 = Color3.fromRGB(255, 50, 50)
+                sl.Font = Enum.Font.GothamBold
+                sl.TextSize = 15
+                sl.TextXAlignment = Enum.TextXAlignment.Left
+
+                local so = { IO = 0 }
+
+                function so.CC2(h)
+                    so.IO = so.IO + 1
+                    local c = Instance.new("Frame", page)
+                    c.Size = UDim2.new(1, 0, 0, h)
+                    c.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                    c.BorderSizePixel = 0
+                    c.LayoutOrder = mso * 1000 + so.IO
+                    Instance.new("UICorner", c).CornerRadius = UDim.new(0, 6)
+                    local ss = Instance.new("UIStroke", c)
+                    ss.Color = Color3.fromRGB(60, 0, 0)
+                    ss.Thickness = 1
+                    return c
+                end
+
+                function so.Toggle(t, d, cb, default)
+                    local c = so.CC2(40)
+                    local tl = Instance.new("TextLabel", c)
+                    tl.Size = UDim2.new(0.7, 0, 1, 0)
+                    tl.Position = UDim2.new(0, 12, 0, 0)
+                    tl.BackgroundTransparency = 1
+                    tl.Text = t
+                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tl.Font = Enum.Font.Gotham
+                    tl.TextSize = 14
+                    tl.TextXAlignment = Enum.TextXAlignment.Left
+
+                    local tb = Instance.new("TextButton", c)
+                    tb.Size = UDim2.new(0, 45, 0, 22)
+                    tb.Position = UDim2.new(1, -57, 0.5, -11)
+                    tb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    tb.Text = ""
+                    tb.BorderSizePixel = 0
+                    Instance.new("UICorner", tb).CornerRadius = UDim.new(1, 0)
+
+                    local kn = Instance.new("Frame", tb)
+                    kn.Size = UDim2.new(0, 18, 0, 18)
+                    kn.Position = UDim2.new(0, 2, 0.5, -9)
+                    kn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    kn.BorderSizePixel = 0
+                    Instance.new("UICorner", kn).CornerRadius = UDim.new(1, 0)
+
+                    local st = FLAGS[d]
+                    if st == nil then st = default or false; FLAGS[d] = st end
+                    if st then
+                        tb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                        kn.Position = UDim2.new(1, -20, 0.5, -9)
+                    end
+                    if cb then pcall(cb, st) end
+
+                    track(tb.MouseButton1Click:Connect(function()
+                        st = not st
+                        FLAGS[d] = st
+                        if st then
+                            tb.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                            kn.Position = UDim2.new(1, -20, 0.5, -9)
+                        else
+                            tb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                            kn.Position = UDim2.new(0, 2, 0.5, -9)
+                        end
+                        if cb then pcall(cb, st) end
+                    end))
+                end
+
+                function so.Button(t, cb, col)
+                    local c = so.CC2(36)
+                    local b = Instance.new("TextButton", c)
+                    b.Size = UDim2.new(1, -20, 0, 26)
+                    b.Position = UDim2.new(0, 10, 0.5, -13)
+                    b.BackgroundColor3 = col or Color3.fromRGB(80, 0, 0)
+                    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    b.Text = t
+                    b.Font = Enum.Font.GothamBold
+                    b.TextSize = 13
+                    b.BorderSizePixel = 0
+                    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+                    track(b.MouseButton1Click:Connect(function() pcall(cb) end))
+                end
+
+                function so.Slider(t, d, min, max, default, cb)
+                    local c = so.CC2(55)
+                    local tl = Instance.new("TextLabel", c)
+                    tl.Size = UDim2.new(0.7, 0, 0, 20)
+                    tl.Position = UDim2.new(0, 12, 0, 5)
+                    tl.BackgroundTransparency = 1
+                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tl.Font = Enum.Font.Gotham
+                    tl.TextSize = 13
+                    tl.TextXAlignment = Enum.TextXAlignment.Left
+
+                    local sb = Instance.new("TextButton", c)
+                    sb.Size = UDim2.new(1, -24, 0, 16)
+                    sb.Position = UDim2.new(0, 12, 0, 30)
+                    sb.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    sb.Text = ""
+                    sb.BorderSizePixel = 0
+                    sb.AutoButtonColor = false
+                    Instance.new("UICorner", sb).CornerRadius = UDim.new(0, 8)
+
+                    local val = tonumber(FLAGS[d]) or default
+                    if val < min then val = min end
+                    if val > max then val = max end
+                    FLAGS[d] = val
+
+                    local initRel = math.clamp((val - min) / (max - min), 0, 1)
+
+                    local fill = Instance.new("Frame", sb)
+                    fill.Size = UDim2.new(initRel, 0, 1, 0)
+                    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                    fill.BorderSizePixel = 0
+                    Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 8)
+
+                    tl.Text = t..": "..tostring(val)
+                    if cb then pcall(cb, val) end
+
+                    local dragging = false
+
+                    local function update(input)
+                        local rel = math.clamp((input.Position.X - sb.AbsolutePosition.X) / sb.AbsoluteSize.X, 0, 1)
+                        val = math.floor(min + (max - min) * rel + 0.5)
+                        fill.Size = UDim2.new(rel, 0, 1, 0)
+                        tl.Text = t..": "..tostring(val)
+                        FLAGS[d] = val
+                        if cb then pcall(cb, val) end
+                    end
+
+                    track(sb.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1
+                        or input.UserInputType == Enum.UserInputType.Touch then
+                            dragging = true
+                            update(input)
+                        end
+                    end))
+                    track(sb.InputEnded:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1
+                        or input.UserInputType == Enum.UserInputType.Touch then
+                            dragging = false
+                        end
+                    end))
+                    track(UIS.InputChanged:Connect(function(input)
+                        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+                        or input.UserInputType == Enum.UserInputType.Touch) then
+                            update(input)
+                        end
+                    end))
+                end
+
+                function so.TextBox(t, d, default, cb)
+                    local c = so.CC2(60)
+                    local tl = Instance.new("TextLabel", c)
+                    tl.Size = UDim2.new(0.7, 0, 0, 20)
+                    tl.Position = UDim2.new(0, 12, 0, 5)
+                    tl.BackgroundTransparency = 1
+                    tl.Text = t
+                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tl.Font = Enum.Font.Gotham
+                    tl.TextSize = 13
+                    tl.TextXAlignment = Enum.TextXAlignment.Left
+
+                    local tb = Instance.new("TextBox", c)
+                    tb.Size = UDim2.new(1, -24, 0, 26)
+                    tb.Position = UDim2.new(0, 12, 0, 28)
+                    tb.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                    tb.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tb.Text = tostring(FLAGS[d] or default or "")
+                    tb.Font = Enum.Font.Gotham
+                    tb.TextSize = 13
+                    tb.BorderSizePixel = 0
+                    tb.ClearTextOnFocus = false
+                    Instance.new("UICorner", tb).CornerRadius = UDim.new(0, 6)
+
+                    if FLAGS[d] == nil then FLAGS[d] = default end
+                    track(tb.FocusLost:Connect(function()
+                        FLAGS[d] = tb.Text
+                        if cb then pcall(cb, tb.Text) end
+                    end))
+                end
+
+                function so.Dropdown(t, d, options, default, cb)
+                    local c = so.CC2(60)
+                    c.ZIndex = 5
+
+                    local tl = Instance.new("TextLabel", c)
+                    tl.Size = UDim2.new(0.7, 0, 0, 20)
+                    tl.Position = UDim2.new(0, 12, 0, 5)
+                    tl.BackgroundTransparency = 1
+                    tl.Text = t
+                    tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    tl.Font = Enum.Font.Gotham
+                    tl.TextSize = 13
+                    tl.TextXAlignment = Enum.TextXAlignment.Left
+                    tl.ZIndex = 6
+
+                    local selected = FLAGS[d] or default or options[1] or ""
+                    FLAGS[d] = selected
+
+                    local db = Instance.new("TextButton", c)
+                    db.Size = UDim2.new(1, -24, 0, 26)
+                    db.Position = UDim2.new(0, 12, 0, 28)
+                    db.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                    db.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    db.Text = selected
+                    db.Font = Enum.Font.Gotham
+                    db.TextSize = 13
+                    db.BorderSizePixel = 0
+                    db.ZIndex = 6
+                    Instance.new("UICorner", db).CornerRadius = UDim.new(0, 6)
+
+                    local open = false
+
+                    local list = Instance.new("Frame", Main)
+                    list.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                    list.BorderSizePixel = 0
+                    list.Visible = false
+                    list.ZIndex = 100
+                    list.ClipsDescendants = false
+                    Instance.new("UICorner", list).CornerRadius = UDim.new(0, 6)
+                    local listStroke = Instance.new("UIStroke", list)
+                    listStroke.Color = Color3.fromRGB(255, 0, 0)
+                    listStroke.Thickness = 1
+
+                    local ll = Instance.new("UIListLayout", list)
+                    ll.SortOrder = Enum.SortOrder.LayoutOrder
+
+                    for _, opt in ipairs(options) do
+                        local ob = Instance.new("TextButton", list)
+                        ob.Size = UDim2.new(1, 0, 0, 24)
+                        ob.BackgroundTransparency = 1
+                        ob.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        ob.Text = opt
+                        ob.Font = Enum.Font.Gotham
+                        ob.TextSize = 12
+                        ob.BorderSizePixel = 0
+                        ob.ZIndex = 101
+                        track(ob.MouseButton1Click:Connect(function()
+                            selected = opt
+                            db.Text = opt
+                            FLAGS[d] = opt
+                            list.Visible = false
+                            open = false
+                            if cb then pcall(cb, opt) end
+                        end))
+                    end
+
+                    track(db.MouseButton1Click:Connect(function()
+                        open = not open
+                        if open then
+                            list.Size = UDim2.new(0, db.AbsoluteSize.X, 0, #options * 24)
+                            list.Position = UDim2.new(
+                                0, db.AbsolutePosition.X - Main.AbsolutePosition.X,
+                                0, db.AbsolutePosition.Y - Main.AbsolutePosition.Y + db.AbsoluteSize.Y + 2
+                            )
+                        end
+                        list.Visible = open
+                    end))
+                end
+
+                return so
+            end
+
+            return tab
+        end
+
+        local mainTab = NewTab("Main")
+        local mainSec = mainTab.NewSection("Combat")
+        mainSec.Toggle("Punch Farm", "PunchFarm")
+        mainSec.Toggle("Tool Farm", "ToolFarm")
+        mainSec.Toggle("Kill Aura", "KillAura")
+        mainSec.Toggle("Kill List", "KillList")
+        mainSec.Toggle("Kill Everyone", "KillEveryone")
+        mainSec.Slider("Kill Range", "Range", 5, 100, 25)
+        mainSec.Toggle("Whitelist Friends", "WhitelistFriends")
+        mainSec.Toggle("Farm Evil Karma", "FarmEvilKarma")
+        mainSec.Toggle("Farm Good Karma", "FarmGoodKarma")
+
+        local farmSec = mainTab.NewSection("Auto Farm Loop")
+        farmSec.Toggle("Auto Farm Loop (All)", "AutoFarmLoop")
+
+        local exSec = mainTab.NewSection("Exercise")
+        exSec.Toggle("Auto Push Ups", "AutoPushUps")
+        exSec.Toggle("Auto Sit Ups", "AutoSitUps")
+        exSec.Toggle("Auto Handstands", "AutoHandstands")
+        exSec.Toggle("Auto Weight", "AutoWeight")
+        exSec.Toggle("Auto Rock", "AutoRock")
+        exSec.Toggle("Pushup + Jungle Rock", "PushupJungleRock")
+        exSec.Toggle("Pushup + Muscle King Rock", "PushupMuscleKingRock")
+        exSec.Toggle("Pushup + Legends Rock", "PushupLegendsRock")
+        exSec.Toggle("Auto Lift", "AutoLift")
+        exSec.Toggle("Auto Punch No Anim", "AutoPunchNoAnim")
+
+        local autoSec = mainTab.NewSection("Automation")
+        autoSec.Toggle("Auto King", "AutoKing")
+        autoSec.Toggle("Auto Brawl", "AutoBrawl")
+        autoSec.Toggle("Auto Egg (30m)", "AutoEgg")
+        autoSec.Toggle("Auto Protein", "AutoProtein")
+        autoSec.Toggle("Auto Spin Wheel", "AutoSpinWheel")
+        autoSec.Toggle("Eat All Eggs", "EatAllEggs")
+        autoSec.Toggle("Eat All Boosts", "EatAllBoosts")
+        autoSec.Toggle("Disable Eating Eggs", "DisableEatingEggs")
+        autoSec.Toggle("NaN Plus Egg", "NaNPlusEgg")
+
+        local rebTab = NewTab("Rebirth")
+        local rebSec = rebTab.NewSection("Rebirth")
+        rebSec.Toggle("Auto Rebirth", "Rebirth")
+        rebSec.Toggle("Use Target Rebirth", "UseRebirthTarget")
+        rebSec.Slider("Rebirth Target", "AutoRebirthTarget", 0, 100, 0)
+
+        local upSec = rebTab.NewSection("Upgrades")
+        upSec.Toggle("Auto Upgrade Strength", "AutoUpgradeStrength")
+        upSec.Toggle("Auto Upgrade Durability", "AutoUpgradeDurability")
+        upSec.Toggle("Auto Upgrade Agility", "AutoUpgradeAgility")
+
+        local crysSec = rebTab.NewSection("Crystal & Sell")
+        crysSec.Toggle("Auto Open Crystal", "AutoCrystal")
+        crysSec.TextBox("Crystal Name", "CrystalName", "Blue Crystal")
+        crysSec.Toggle("Auto Sell All", "AutoSell")
+
+        local gymTab = NewTab("Gym")
+        local gymSec = gymTab.NewSection("Gym")
+        gymSec.Toggle("Auto Gym", "AutoGym")
+        gymSec.TextBox("Gym Name", "GymName", "Muscle King Gym")
+
+        local giftSec = gymTab.NewSection("Gift Collection")
+        giftSec.Toggle("Auto Collect Gift", "AutoCollectGift")
+
+        local gpSec = gymTab.NewSection("Gift To Player")
+        gpSec.Toggle("Gift Protein", "GiftProtein")
+        gpSec.TextBox("Protein Target", "GiftProteinTarget", "")
+        gpSec.Slider("Protein Amount", "GiftProteinAmount", 0, 100, 0)
+        gpSec.Toggle("Gift Shake", "GiftShake")
+        gpSec.TextBox("Shake Target", "GiftShakeTarget", "")
+        gpSec.Slider("Shake Amount", "GiftShakeAmount", 0, 100, 0)
+
+        local miscTab = NewTab("Misc")
+        local miscSec = miscTab.NewSection("Player")
+        miscSec.Toggle("Anti AFK", "AntiAFK")
+        miscSec.Toggle("Anti Ragdoll", "AntiRagdoll")
+        miscSec.Toggle("Anti Fling", "AntiFling")
+        miscSec.Toggle("No Clip", "NoClip")
+        miscSec.Toggle("Walk Water", "WalkWater")
+        miscSec.Toggle("Lock Position", "LockPos")
+        miscSec.Toggle("Infinite Jump", "InfiniteJump")
+        miscSec.Toggle("Auto Sprint", "AutoSprint")
+        miscSec.Slider("Walk Speed", "SpeedValue", 16, 200, 16, function(v)
+            local hum = GetHum()
+            if hum and not FLAGS.AutoSprint then
+                hum.WalkSpeed = v
+            end
+        end)
+
+        local visualSec = miscTab.NewSection("Visual")
+        visualSec.Toggle("Full Bright", "FullBright")
+        visualSec.Toggle("Remove Attack Anim", "RemoveAttackAnim")
+        visualSec.Toggle("Show My Pets", "ShowPets")
+        visualSec.Toggle("Show Other Pets", "ShowOtherPets")
+        visualSec.Toggle("Hide Stat Frames", "HideStatFrames")
+        visualSec.Dropdown("Time", "ChangeTime", {"Day", "Night", "Sunset"}, "Day")
+
+        local fpsSec = miscTab.NewSection("Performance")
+        fpsSec.Toggle("FPS Boost", "FPSBoost", function(on)
+            if on then EnableFPSBoost() else DisableFPSBoost() end
+        end)
+
+        local skySec = miscTab.NewSection("Sky Farm")
+        skySec.Toggle("Sky Farm", "SkyFarm")
+        skySec.Slider("Sky Y", "SkyY", 100, 10000, 5000)
+
+        local targetSec = miscTab.NewSection("Player Target")
+        targetSec.TextBox("Player Name", "SelectedPlayer", "")
+        targetSec.Toggle("Spectate", "Spectate")
+        targetSec.Toggle("Lend Damage", "LendDamage")
+        targetSec.TextBox("Lend Target", "LendDamageTarget", "")
+
+        local petTab = NewTab("Pet")
+        local petSec = petTab.NewSection("Pet & Aura")
+        petSec.Toggle("Buy Pet", "BuyPet")
+        petSec.TextBox("Pet Name", "SelectedPet", "")
+        petSec.Toggle("Buy Aura", "BuyAura")
+        petSec.TextBox("Aura Name", "SelectedAura", "")
+
+        local adminSec = petTab.NewSection("Admin")
+        adminSec.Toggle("Admin Detect", "AdminDetect")
+
+        local cfgTab = NewTab("Config")
+        local cfgSec = cfgTab.NewSection("Config")
+        cfgSec.Toggle("Auto Save on Unload", "AutoSaveConfig")
+        cfgSec.Button("Save Config Now", function()
+            if SaveConfig() then Notify("Da luu config!")
+            else Notify("Loi khi luu!") end
+        end, Color3.fromRGB(0, 100, 0))
+        cfgSec.Button("Load Config", function()
+            LoadConfig()
+            Notify("Da load config! Restart script de ap dung.")
+        end, Color3.fromRGB(0, 80, 100))
+        cfgSec.Button("Reset Config", function()
+            DeleteConfig()
+            Notify("Da xoa config!")
+        end, Color3.fromRGB(100, 50, 0))
+        cfgSec.Dropdown("Toggle Keybind", "ToggleKeybind",
+            {"RightShift", "LeftShift", "RightControl", "LeftControl", "Tab", "Insert", "F1"},
+            "RightShift")
+
+        local debugTab = NewTab("Debug")
+        local debugSec = debugTab.NewSection("Tools")
+        debugSec.Button("Dump Remotes (F9)", DumpRemotes)
+        debugSec.Button("Dump Tools (F9)", DumpTools)
+
+        StartAntiAFK()
+
+        task.spawn(function()
+            while not UNLOADED do
+                pcall(ToolFarm)
+                pcall(PunchFarm)
+                pcall(KillAura)
+                task.wait(0.05)
+            end
+        end)
+
+        track(LP.CharacterAdded:Connect(function()
+            task.wait(1)
+            if Main and Main.Parent then Main.Visible = true end
+        end))
+
+        Notify("KhoiFarm v3.3 da load! ("..#Tabs.." tabs)")
+    end
+
+    MakeUI()
+
+    track(UIS.JumpRequest:Connect(function()
+        if FLAGS.InfiniteJump then
+            local hum = GetHum()
+            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        end
+    end))
+
+    local _lastSprintState = false
+    track(RS.Heartbeat:Connect(function()
+        if FLAGS.AutoSprint then
+            _lastSprintState = true
+            local hum = GetHum()
+            if hum and hum.MoveDirection.Magnitude > 0 then
+                hum.WalkSpeed = FLAGS.SpeedValue
+            end
+        elseif _lastSprintState then
+            _lastSprintState = false
+            local hum = GetHum()
+            if hum then hum.WalkSpeed = 16 end
+        end
+
+        if FLAGS.LockPos then
+            local h = GetHRP()
+            if h and not h.Anchored then h.Anchored = true end
+        else
+            local h = GetHRP()
+            if h and h.Anchored then h.Anchored = false end
+        end
+    end))
+
+    local keyMap = {
+        RightShift = Enum.KeyCode.RightShift,
+        LeftShift = Enum.KeyCode.LeftShift,
+        RightControl = Enum.KeyCode.RightControl,
+        LeftControl = Enum.KeyCode.LeftControl,
+        Tab = Enum.KeyCode.Tab,
+        Insert = Enum.KeyCode.Insert,
+        F1 = Enum.KeyCode.F1,
+    }
+
+    track(UIS.InputBegan:Connect(function(input, gpe)
+        if gpe then return end
+        local key = keyMap[FLAGS.ToggleKeybind] or Enum.KeyCode.RightShift
+        if input.KeyCode == key then
+            if Main and Main.Parent then
+                if Mini and Mini.Visible then
+                    Mini.Visible = false
+                    Main.Visible = true
+                else
+                    Main.Visible = not Main.Visible
+                end
+            end
+        end
+    end))
+
+    print("[KhoiFarm v3.3] Script loaded successfully!")
+    Notify("KhoiFarm v3.3 | RightShift de an/hien UI")
+
+end)
+
+if not _ok then
+    warn("[KhoiFarm ERROR] " .. tostring(_err))
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "KhoiFarm LỖI",
+            Text = tostring(_err),
+            Duration = 10
+        })
+    end)
+end
