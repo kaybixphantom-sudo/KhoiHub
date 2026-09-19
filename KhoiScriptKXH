@@ -1,0 +1,154 @@
+local _ok, _err = pcall(function()
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
+    task.wait(0.5)
+
+    local SG_svc = game:GetService("StarterGui")
+    local PL = game:GetService("Players")
+    local LP = PL.LocalPlayer
+    if not LP then
+        repeat task.wait() until PL.LocalPlayer
+        LP = PL.LocalPlayer
+    end
+
+    local CG = LP:WaitForChild("PlayerGui", 10)
+    if not CG then CG = LP:FindFirstChildOfClass("PlayerGui") end
+    if not CG then CG = LP:WaitForChild("PlayerGui") end
+
+    for _, n in ipairs({"KhoiFarmLoaderUI"}) do
+        local o = CG:FindFirstChild(n)
+        if o then pcall(function() o:Destroy() end) end
+    end
+
+    local VALID_KEY = "KhoiFarmVIP"
+    local unlocked = false
+
+    local LoaderGui = Instance.new("ScreenGui")
+    LoaderGui.Name = "KhoiFarmLoaderUI"
+    LoaderGui.ResetOnSpawn = false
+    LoaderGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() LoaderGui.IgnoreGuiInset = true end)
+    LoaderGui.Parent = CG
+
+    local MainFrame = Instance.new("Frame", LoaderGui)
+    MainFrame.Size = UDim2.new(0, 320, 0, 380)
+    MainFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainFrame.BorderSizePixel = 0
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+    local Stroke = Instance.new("UIStroke", MainFrame)
+    Stroke.Color = Color3.fromRGB(60, 0, 0)
+    Stroke.Thickness = 2
+
+    local dragging, dragStart, startPos
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    MainFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            if dragging then
+                local delta = input.Position - dragStart
+                MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end
+    end)
+
+    local Title = Instance.new("TextLabel", MainFrame)
+    Title.Size = UDim2.new(1, 0, 0, 60)
+    Title.Position = UDim2.new(0, 0, 0, 10)
+    Title.BackgroundTransparency = 1
+    Title.Text = "KhoiFarm Loader"
+    Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 24
+
+    local KeyBox = Instance.new("TextBox", MainFrame)
+    KeyBox.Size = UDim2.new(1, -40, 0, 45)
+    KeyBox.Position = UDim2.new(0, 20, 0, 80)
+    KeyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KeyBox.PlaceholderText = "Enter the Key..."
+    KeyBox.PlaceholderColor3 = Color3.fromRGB(150, 50, 50)
+    KeyBox.Font = Enum.Font.Gotham
+    KeyBox.TextSize = 16
+    KeyBox.BorderSizePixel = 0
+    KeyBox.ClearTextOnFocus = false
+    Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 8)
+
+    local MainBtn = Instance.new("TextButton", MainFrame)
+    MainBtn.Size = UDim2.new(1, -40, 0, 50)
+    MainBtn.Position = UDim2.new(0, 20, 0, 145)
+    MainBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+    MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MainBtn.Text = "Main Script"
+    MainBtn.Font = Enum.Font.GothamBold
+    MainBtn.TextSize = 18
+    MainBtn.BorderSizePixel = 0
+    Instance.new("UICorner", MainBtn).CornerRadius = UDim.new(0, 8)
+
+    local FarmBtn = Instance.new("TextButton", MainFrame)
+    FarmBtn.Size = UDim2.new(1, -40, 0, 50)
+    FarmBtn.Position = UDim2.new(0, 20, 0, 210)
+    FarmBtn.BackgroundColor3 = Color3.fromRGB(120, 20, 20)
+    FarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FarmBtn.Text = "Farming Script"
+    FarmBtn.Font = Enum.Font.GothamBold
+    FarmBtn.TextSize = 18
+    FarmBtn.BorderSizePixel = 0
+    Instance.new("UICorner", FarmBtn).CornerRadius = UDim.new(0, 8)
+
+    local Footer = Instance.new("TextLabel", MainFrame)
+    Footer.Size = UDim2.new(1, 0, 0, 30)
+    Footer.Position = UDim2.new(0, 0, 1, -35)
+    Footer.BackgroundTransparency = 1
+    Footer.Text = "Make by AduAnhKhoi"
+    Footer.TextColor3 = Color3.fromRGB(100, 100, 100)
+    Footer.Font = Enum.Font.Gotham
+    Footer.TextSize = 12
+
+    MainBtn.MouseButton1Click:Connect(function()
+        if KeyBox.Text == VALID_KEY then
+            MainFrame:Destroy()
+            SG_svc:SetCore("SendNotification", {
+                Title = "KhoiFarm", Text = "Dang tai KhoiMain...", Duration = 3
+            })
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/kaybixphantom-sudo/KhoiHub/refs/heads/main/KhoiMain"))()
+            end)
+        else
+            SG_svc:SetCore("SendNotification", {
+                Title = "KhoiFarm", Text = "Key sai hoac da het han!", Duration = 3
+            })
+            KeyBox.Text = ""
+        end
+    end)
+
+    FarmBtn.MouseButton1Click:Connect(function()
+        if KeyBox.Text == VALID_KEY then
+            MainFrame:Destroy()
+            SG_svc:SetCore("SendNotification", {
+                Title = "KhoiFarm", Text = "Dang tai KhoiFast...", Duration = 3
+            })
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/kaybixphantom-sudo/KhoiHub/refs/heads/main/KhoiFast"))()
+            end)
+        else
+            SG_svc:SetCore("SendNotification", {
+                Title = "KhoiFarm", Text = "Key sai hoac da het han!", Duration = 3
+            })
+            KeyBox.Text = ""
+        end
+    end)
+end)
+
+if not _ok then
+    warn("[KhoiFarm ERROR] " .. tostring(_err))
+end
