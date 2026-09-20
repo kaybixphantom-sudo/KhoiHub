@@ -1,0 +1,231 @@
+local _ok, _err = pcall(function()
+if not game:IsLoaded() then game.Loaded:Wait() end
+task.wait(0.5)
+local PL = game:GetService("Players")
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local SG_svc = game:GetService("StarterGui")
+local LP = PL.LocalPlayer
+if not LP then repeat task.wait() until PL.LocalPlayer; LP = PL.LocalPlayer end
+local CG = LP:WaitForChild("PlayerGui", 10)
+if not CG then
+repeat task.wait() until LP:FindFirstChildOfClass("PlayerGui")
+CG = LP:FindFirstChildOfClass("PlayerGui")
+end
+for _, n in ipairs({"KhoiFastUI"}) do
+local o = CG:FindFirstChild(n)
+if o then pcall(function() o:Destroy() end) end
+end
+local UNLOADED = false
+local CONNS = {}
+local FLAGS = { FastRep=false, AutoRebirth=false, KillAura=false, SkyFarm=false, AutoPunchNoAnim=false }
+local _miss = {}
+local function track(c) if c then table.insert(CONNS, c) end return c end
+local function cleanup()
+UNLOADED = true
+for _, c in ipairs(CONNS) do pcall(function() c:Disconnect() end) end
+CONNS = {}
+local char = LP.Character
+if char then
+local hrp = char:FindFirstChild("HumanoidRootPart")
+if hrp then pcall(function() hrp.Anchored = false end) end
+end
+end
+local function DeepFind(p, name)
+local f = p:FindFirstChild(name)
+if f then return f end
+for _, v in pairs(p:GetDescendants()) do
+if v.Name == name then return v end
+end
+end
+local function GetREvents() return game:GetService("ReplicatedStorage"):FindFirstChild("rEvents") end
+local _cache = {}
+local function ResolveRemote(key, candidates)
+if _cache[key] and _cache[key].Parent then return _cache[key] end
+if _miss[key] and tick() - _miss[key] < 5 then return nil end
+local r = GetREvents()
+if r then
+for _, n in ipairs(candidates) do
+local f = r:FindFirstChild(n)
+if f then _cache[key] = f; _miss[key] = nil; return f end
+end
+end
+for _, n in ipairs(candidates) do
+local f = DeepFind(game:GetService("ReplicatedStorage"), n)
+if f then _cache[key] = f; _miss[key] = nil; return f end
+end
+_miss[key] = tick()
+return nil
+end
+local function GetMuscleEvent()
+local direct = LP:FindFirstChild("MuscleEvent")
+if direct then return direct end
+if LP.Character then
+local fromChar = LP.Character:FindFirstChild("MuscleEvent")
+if fromChar then return fromChar end
+end
+return ResolveRemote("muscle", {"MuscleEvent","muscleEvent","Muscle"})
+end
+local function GetRebirthRemote() return ResolveRemote("rebirth", {"rebirthRemote","RebirthRemote","rebirthEvent"}) end
+local function GetChar() return LP.Character end
+local function GetHRP() local c=GetChar(); return c and c:FindFirstChild("HumanoidRootPart") end
+local function GetHum() local c=GetChar(); return c and c:FindFirstChildOfClass("Humanoid") end
+local function Notify(t)
+pcall(function()
+SG_svc:SetCore("SendNotification", {Title="KhoiFast", Text=tostring(t), Duration=3})
+end)
+end
+local function Fire(remote, ...)
+if not remote then return end
+local args = {...}
+pcall(function()
+if remote:IsA("RemoteFunction") then remote:InvokeServer(table.unpack(args))
+else remote:FireServer(table.unpack(args)) end
+end)
+end
+local function punch()
+local m = GetMuscleEvent()
+if not m then return end
+Fire(m, "punch", "leftHand")
+task.wait()
+Fire(m, "punch", "rightHand")
+end
+local function punchOne(hand)
+local m = GetMuscleEvent()
+if not m then return end
+Fire(m, "punch", hand)
+end
+task.spawn(function()
+while not UNLOADED do
+if FLAGS.FastRep then punch(); task.wait(0.08)
+else task.wait(0.15) end
+end
+end)
+task.spawn(function()
+while not UNLOADED do
+if FLAGS.AutoRebirth then
+local r = GetRebirthRemote()
+if r then Fire(r, "rebirthRequest") end
+end
+task.wait(5)
+end
+end)
+task.spawn(function()
+local toggle = false
+while not UNLOADED do
+if FLAGS.KillAura then
+local h = GetHRP()
+if h then
+local hit = false
+for _, p in ipairs(PL:GetPlayers()) do
+if p ~= LP and p.Character then
+local th = p.Character:FindFirstChild("HumanoidRootPart")
+local hm = p.Character:FindFirstChildOfClass("Humanoid")
+if th and hm and hm.Health > 0
+and (h.Position - th.Position).Magnitude < 25 then
+hit = true
+end
+end
+end
+if hit then
+toggle = not toggle
+punchOne(toggle and "leftHand" or "rightHand")
+end
+end
+task.wait(0.12)
+else
+task.wait(0.2)
+end
+end
+end)
+local skyStateSet = false
+track(RS.Heartbeat:Connect(function()
+if not FLAGS.SkyFarm then
+skyStateSet = false
+return
+end
+local h, hum = GetHRP(), GetHum()
+if h and hum then
+h.CFrame = CFrame.new(h.Position.X, 5000, h.Position.Z)
+h.AssemblyLinearVelocity = Vector3.zero
+h.AssemblyAngularVelocity = Vector3.zero
+if not skyStateSet then
+skyStateSet = true
+pcall(function() hum:ChangeState(Enum.HumanoidStateType.Physics) end)
+end
+end
+end))
+track(UIS.InputBegan:Connect(function(input, gp)
+if gp then return end
+if not FLAGS.AutoPunchNoAnim then return end
+local isPunch =
+input.UserInputType == Enum.UserInputType.MouseButton1
+or input.KeyCode == Enum.KeyCode.E
+or input.KeyCode == Enum.KeyCode.ButtonR2
+if isPunch then punch() end
+end))
+local SG = Instance.new("ScreenGui")
+SG.Name = "KhoiFastUI"
+SG.ResetOnSpawn = false
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.DisplayOrder = 999
+SG.Parent = CG
+local Main = Instance.new("Frame", SG)
+Main.Size = UDim2.new(0, 320, 0, 340)
+Main.Position = UDim2.new(0.5, -160, 0.5, -170)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.BorderSizePixel = 0
+Main.Active = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,10)
+local MS = Instance.new("UIStroke", Main)
+MS.Color = Color3.fromRGB(255,80,0); MS.Thickness = 2
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(30,10,0)
+Title.Text = "KhoiFast"
+Title.TextColor3 = Color3.fromRGB(255,100,0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0,10)
+local function mkBtn(txt, y, col, flag)
+local b = Instance.new("TextButton", Main)
+b.Size = UDim2.new(1, -30, 0, 40)
+b.Position = UDim2.new(0, 15, 0, y)
+b.BackgroundColor3 = col
+b.Text = txt
+b.TextColor3 = Color3.fromRGB(255,255,255)
+b.Font = Enum.Font.GothamBold
+b.TextSize = 15
+b.BorderSizePixel = 0
+Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+track(b.MouseButton1Click:Connect(function()
+FLAGS[flag] = not FLAGS[flag]
+b.BackgroundColor3 = FLAGS[flag] and Color3.fromRGB(0,150,0) or col
+Notify(txt .. (FLAGS[flag] and " ON" or " OFF"))
+end))
+return b
+end
+mkBtn("Fast Rep",            50,  Color3.fromRGB(80,0,0), "FastRep")
+mkBtn("Auto Rebirth",        95,  Color3.fromRGB(80,0,0), "AutoRebirth")
+mkBtn("Kill Aura",           140, Color3.fromRGB(80,0,0), "KillAura")
+mkBtn("Sky Farm",            185, Color3.fromRGB(80,0,0), "SkyFarm")
+mkBtn("Auto Punch No Anim",  230, Color3.fromRGB(80,0,0), "AutoPunchNoAnim")
+local XBtn = Instance.new("TextButton", Main)
+XBtn.Size = UDim2.new(0,30,0,30)
+XBtn.Position = UDim2.new(1,-35,0,5)
+XBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+XBtn.Text = "X"
+XBtn.TextColor3 = Color3.fromRGB(255,255,255)
+XBtn.Font = Enum.Font.GothamBold
+XBtn.TextSize = 14
+XBtn.BorderSizePixel = 0
+XBtn.ZIndex = 10
+Instance.new("UICorner", XBtn).CornerRadius = UDim.new(0,6)
+track(XBtn.MouseButton1Click:Connect(function()
+cleanup(); SG:Destroy(); Notify("Da unload KhoiFast.")
+end))
+Notify("KhoiFast da load!")
+end)
+if not _ok then
+warn("[KhoiFast ERROR] " .. tostring(_err))
+end
