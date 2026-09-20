@@ -1,0 +1,499 @@
+local PL=game:GetService("Players")
+local RS=game:GetService("RunService")
+local UIS=game:GetService("UserInputService")
+local SG_svc=game:GetService("StarterGui")
+local LIGHT=game:GetService("Lighting")
+local LP=PL.LocalPlayer
+repeat task.wait() until LP
+local CG=LP:WaitForChild("PlayerGui")
+local old=CG:FindFirstChild("KhoiMainUI")
+if old then old:Destroy() end
+local U=false
+local C={}
+local F={
+FastRep=false,AutoRebirth=false,KillAura=false,Range=25,
+SkyFarm=false,AutoEgg=false,AutoWheel=false,AutoCrystal=false,
+CrystalName="Blue Crystal",AutoSell=false,
+AutoUpgradeStr=false,AutoUpgradeDur=false,AutoUpgradeAgi=false,
+AntiAFK=false,AntiRagdoll=false,NoClip=false,WalkWater=false,
+FullBright=false,RemoveAnim=false,SpeedValue=16
+}
+local LO={Ambient=LIGHT.Ambient,OutdoorAmbient=LIGHT.OutdoorAmbient,
+Brightness=LIGHT.Brightness,FogEnd=LIGHT.FogEnd,
+GlobalShadows=LIGHT.GlobalShadows,ClockTime=LIGHT.ClockTime}
+local function RestoreLight()
+pcall(function()
+LIGHT.Ambient=LO.Ambient
+LIGHT.OutdoorAmbient=LO.OutdoorAmbient
+LIGHT.Brightness=LO.Brightness
+LIGHT.FogEnd=LO.FogEnd
+LIGHT.GlobalShadows=LO.GlobalShadows
+LIGHT.ClockTime=LO.ClockTime
+end)
+end
+local function track(c) if c then table.insert(C,c) end return c end
+local function cleanup()
+U=true
+for _,c in ipairs(C) do pcall(function() c:Disconnect() end) end
+C={}
+RestoreLight()
+end
+local function Notify(t)
+pcall(function()
+SG_svc:SetCore("SendNotification",{Title="KhoiMain",Text=tostring(t),Duration=3})
+end)
+end
+local function DeepFind(p,n)
+local f=p:FindFirstChild(n)
+if f then return f end
+for _,v in pairs(p:GetDescendants()) do
+if v.Name==n then return v end
+end
+end
+local cache={}
+local function Resolve(key,names)
+if cache[key] and cache[key].Parent then return cache[key] end
+local r=game:GetService("ReplicatedStorage"):FindFirstChild("rEvents")
+if r then
+for _,n in ipairs(names) do
+local f=r:FindFirstChild(n)
+if f then cache[key]=f; return f end
+end
+end
+for _,n in ipairs(names) do
+local f=DeepFind(game:GetService("ReplicatedStorage"),n)
+if f then cache[key]=f; return f end
+end
+end
+local function GM() return Resolve("m",{"muscleEvent","MuscleEvent","Muscle"}) end
+local function GR() return Resolve("r",{"rebirthRemote","RebirthRemote","rebirthEvent"}) end
+local function GW() return Resolve("w",{"spinWheelEvent","fortuneWheelEvent","SpinWheel"}) end
+local function GC() return Resolve("c",{"openCrystalRemote","crystalEvent","openCrystal"}) end
+local function GS() return Resolve("s",{"sellAllEvent","sellEvent","sellAllRemote","sellPetEvent"}) end
+local function GU() return Resolve("u",{"upgradeEvent","upgradeRemote","upgradeStatEvent","upgrade"}) end
+local function GetChar() return LP.Character end
+local function GetHRP() local c=GetChar(); return c and c:FindFirstChild("HumanoidRootPart") end
+local function GetHum() local c=GetChar(); return c and c:FindFirstChildOfClass("Humanoid") end
+local function Fire(r,...)
+if not r then return end
+local a={...}
+pcall(function()
+if r:IsA("RemoteFunction") then r:InvokeServer(table.unpack(a))
+else r:FireServer(table.unpack(a)) end
+end)
+end
+local lastEgg=0
+task.spawn(function()
+while not U do
+if F.AutoEgg and os.clock()-lastEgg>=1800 then
+lastEgg=os.clock()
+local m=GM()
+if m then Fire(m,"autoEgg") end
+end
+task.wait(1)
+end
+end)
+local function OnChar(c)
+local h=c:WaitForChild("Humanoid",5)
+if not h then return end
+if F.SpeedValue~=16 then h.WalkSpeed=F.SpeedValue end
+if F.AntiRagdoll then
+pcall(function()
+h:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+h:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+end)
+end
+end
+track(LP.CharacterAdded:Connect(function(c) task.spawn(OnChar,c) end))
+if LP.Character then task.spawn(OnChar,LP.Character) end
+task.spawn(function()
+while not U do
+if F.FastRep then
+local m=GM()
+if m then Fire(m,"punch","leftHand"); Fire(m,"punch","rightHand") end
+end
+task.wait(0.01)
+end
+end)
+task.spawn(function()
+while not U do
+if F.AutoRebirth then
+local r=GR()
+if r then Fire(r,"rebirthRequest") end
+end
+task.wait(5)
+end
+end)
+task.spawn(function()
+while not U do
+if F.KillAura then
+local h=GetHRP()
+local m=GM()
+if h and m then
+for _,p in ipairs(PL:GetPlayers()) do
+if p~=LP and p.Character then
+local th=p.Character:FindFirstChild("HumanoidRootPart")
+local hm=p.Character:FindFirstChildOfClass("Humanoid")
+if th and hm and hm.Health>0 and (h.Position-th.Position).Magnitude<F.Range then
+Fire(m,"punch","leftHand"); Fire(m,"punch","rightHand"); break
+end
+end
+end
+end
+end
+task.wait(0.1)
+end
+end)
+task.spawn(function()
+while not U do
+if F.AutoWheel then local r=GW(); if r then Fire(r) end end
+task.wait(30)
+end
+end)
+task.spawn(function()
+while not U do
+if F.AutoCrystal then local r=GC(); if r then Fire(r,F.CrystalName) end end
+task.wait(3)
+end
+end)
+task.spawn(function()
+while not U do
+if F.AutoSell then local r=GS(); if r then Fire(r) end end
+task.wait(5)
+end
+end)
+task.spawn(function()
+while not U do
+if F.AutoUpgradeStr or F.AutoUpgradeDur or F.AutoUpgradeAgi then
+local r=GU()
+if r then
+if F.AutoUpgradeStr then Fire(r,"Strength") end
+if F.AutoUpgradeDur then Fire(r,"Durability") end
+if F.AutoUpgradeAgi then Fire(r,"Agility") end
+end
+end
+task.wait(2)
+end
+end)
+track(RS.Heartbeat:Connect(function()
+if F.SkyFarm then
+local h=GetHRP()
+if h then h.CFrame=CFrame.new(h.Position.X,5000,h.Position.Z) end
+end
+end))
+track(RS.Stepped:Connect(function()
+if F.WalkWater then
+local h=GetHRP()
+if h and h.Position.Y<1 then h.CFrame=CFrame.new(h.Position.X,2,h.Position.Z) end
+end
+end))
+track(RS.Heartbeat:Connect(function()
+if F.AntiRagdoll then
+local hum=GetHum()
+if hum then
+pcall(function()
+if hum:GetStateEnabled(Enum.HumanoidStateType.FallingDown) then
+hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+end
+if hum:GetStateEnabled(Enum.HumanoidStateType.Ragdoll) then
+hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+end
+end)
+end
+end
+end))
+track(RS.Stepped:Connect(function()
+if F.NoClip then
+local c=GetChar()
+if c then
+for _,v in ipairs(c:GetDescendants()) do
+if v:IsA("BasePart") and v.CanCollide then v.CanCollide=false end
+end
+end
+end
+end))
+track(RS.Heartbeat:Connect(function()
+if F.RemoveAnim then
+pcall(function()
+local c=GetChar()
+if c then
+local a=c:FindFirstChildOfClass("Animator")
+if a then
+for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+local n=t.Name:lower()
+if n:find("punch") or n:find("attack") or n:find("hit") or n:find("swing") then t:Stop() end
+end
+end
+end
+end)
+end
+end))
+track(RS.Heartbeat:Connect(function()
+local hum=GetHum()
+if hum and hum.WalkSpeed~=F.SpeedValue then hum.WalkSpeed=F.SpeedValue end
+end))
+track(LP.Idled:Connect(function()
+if F.AntiAFK then
+pcall(function()
+local vu=game:GetService("VirtualUser")
+vu:CaptureController()
+vu:ClickButton2(Vector2.new())
+end)
+end
+end))
+local SG=Instance.new("ScreenGui")
+SG.Name="KhoiMainUI"
+SG.ResetOnSpawn=false
+SG.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+SG.DisplayOrder=999
+SG.Parent=CG
+local Main=Instance.new("Frame",SG)
+Main.Size=UDim2.new(0,600,0,400)
+Main.Position=UDim2.new(0.5,-300,0.5,-200)
+Main.BackgroundColor3=Color3.new(0.06,0.06,0.06)
+Main.BorderSizePixel=0
+Main.Active=true
+Instance.new("UICorner",Main).CornerRadius=UDim.new(0,10)
+local MS=Instance.new("UIStroke",Main)
+MS.Color=Color3.new(1,0,0)
+MS.Thickness=2
+local dragging,dragStart,startPos,dragConn
+Main.InputBegan:Connect(function(input)
+if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+dragging=true; dragStart=input.Position; startPos=Main.Position
+if dragConn then dragConn:Disconnect() end
+dragConn=input.Changed:Connect(function()
+if input.UserInputState==Enum.UserInputState.End then dragging=false end
+end)
+end
+end)
+Main.InputChanged:Connect(function(input)
+if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
+local d=input.Position-dragStart
+Main.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
+end
+end)
+local TB=Instance.new("Frame",Main)
+TB.Size=UDim2.new(1,0,0,40)
+TB.BackgroundColor3=Color3.new(0.12,0,0)
+TB.BorderSizePixel=0
+Instance.new("UICorner",TB).CornerRadius=UDim.new(0,10)
+local TL=Instance.new("TextLabel",TB)
+TL.Size=UDim2.new(1,-60,1,0); TL.Position=UDim2.new(0,15,0,0)
+TL.BackgroundTransparency=1
+TL.Text="KhoiMain | Muscle Legends"
+TL.TextColor3=Color3.new(1,0.2,0.2)
+TL.Font=Enum.Font.GothamBold; TL.TextSize=18
+TL.TextXAlignment=Enum.TextXAlignment.Left
+local XBtn=Instance.new("TextButton",TB)
+XBtn.Size=UDim2.new(0,30,0,30); XBtn.Position=UDim2.new(1,-40,0,5)
+XBtn.BackgroundColor3=Color3.new(0.6,0,0)
+XBtn.Text="X"; XBtn.TextColor3=Color3.new(1,1,1)
+XBtn.Font=Enum.Font.GothamBold; XBtn.TextSize=14; XBtn.BorderSizePixel=0
+Instance.new("UICorner",XBtn).CornerRadius=UDim.new(0,6)
+track(XBtn.MouseButton1Click:Connect(function()
+cleanup(); SG:Destroy(); Notify("Da unload KhoiMain.")
+end))
+local SB=Instance.new("ScrollingFrame",Main)
+SB.Size=UDim2.new(0,130,1,-50); SB.Position=UDim2.new(0,5,0,45)
+SB.BackgroundColor3=Color3.new(0.08,0.08,0.08); SB.BorderSizePixel=0
+SB.ScrollBarThickness=4; SB.ScrollBarImageColor3=Color3.new(1,0,0)
+SB.CanvasSize=UDim2.new(0,0,0,0)
+local sbL=Instance.new("UIListLayout",SB)
+sbL.SortOrder=Enum.SortOrder.LayoutOrder; sbL.Padding=UDim.new(0,6)
+local sbP=Instance.new("UIPadding",SB)
+sbP.PaddingTop=UDim.new(0,5); sbP.PaddingBottom=UDim.new(0,5)
+sbP.PaddingLeft=UDim.new(0,5); sbP.PaddingRight=UDim.new(0,5)
+local CT=Instance.new("Frame",Main)
+CT.Size=UDim2.new(1,-145,1,-50); CT.Position=UDim2.new(0,140,0,45)
+CT.BackgroundColor3=Color3.new(0.08,0.08,0.08); CT.BorderSizePixel=0
+Instance.new("UICorner",CT).CornerRadius=UDim.new(0,6)
+local Tabs={}
+local function NewTab(name)
+local btn=Instance.new("TextButton",SB)
+btn.Size=UDim2.new(1,0,0,30); btn.BackgroundColor3=Color3.new(0.14,0,0)
+btn.TextColor3=Color3.new(1,1,1); btn.Text=name
+btn.Font=Enum.Font.Gotham; btn.TextSize=13; btn.BorderSizePixel=0
+Instance.new("UICorner",btn).CornerRadius=UDim.new(0,6)
+local page=Instance.new("ScrollingFrame",CT)
+page.Size=UDim2.new(1,0,1,0); page.BackgroundTransparency=1
+page.BorderSizePixel=0; page.ScrollBarThickness=4
+page.ScrollBarImageColor3=Color3.new(1,0,0)
+page.CanvasSize=UDim2.new(0,0,0,0); page.ClipsDescendants=true
+page.Visible=false
+local lay=Instance.new("UIListLayout",page)
+lay.SortOrder=Enum.SortOrder.LayoutOrder; lay.Padding=UDim.new(0,6)
+local pad=Instance.new("UIPadding",page)
+pad.PaddingTop=UDim.new(0,8); pad.PaddingBottom=UDim.new(0,8)
+pad.PaddingLeft=UDim.new(0,8); pad.PaddingRight=UDim.new(0,8)
+local tab={Btn=btn,Page=page,SO=0}
+local function Select()
+for _,t in pairs(Tabs) do t.Page.Visible=false; t.Btn.BackgroundColor3=Color3.new(0.14,0,0) end
+page.Visible=true; btn.BackgroundColor3=Color3.new(1,0,0)
+TL.Text="KhoiMain | "..name
+end
+track(btn.MouseButton1Click:Connect(Select))
+table.insert(Tabs,tab)
+if #Tabs==1 then Select() end
+function tab.NewSection(sname)
+tab.SO=tab.SO+1; local mso=tab.SO
+local sf=Instance.new("Frame",page)
+sf.Size=UDim2.new(1,0,0,26); sf.BackgroundTransparency=1
+sf.LayoutOrder=mso*1000
+local sl=Instance.new("TextLabel",sf)
+sl.Size=UDim2.new(1,0,1,0); sl.BackgroundTransparency=1
+sl.Text="> "..sname; sl.TextColor3=Color3.new(1,0.2,0.2)
+sl.Font=Enum.Font.GothamBold; sl.TextSize=15
+sl.TextXAlignment=Enum.TextXAlignment.Left
+local so={IO=0}
+function so.CC2(h)
+so.IO=so.IO+1
+local c=Instance.new("Frame",page)
+c.Size=UDim2.new(1,0,0,h); c.BackgroundColor3=Color3.new(0.12,0.12,0.12)
+c.BorderSizePixel=0; c.LayoutOrder=mso*1000+so.IO
+Instance.new("UICorner",c).CornerRadius=UDim.new(0,6)
+local ss=Instance.new("UIStroke",c)
+ss.Color=Color3.new(0.24,0,0); ss.Thickness=1
+return c
+end
+function so.Toggle(t,d,cb)
+local c=so.CC2(40)
+local tl=Instance.new("TextLabel",c)
+tl.Size=UDim2.new(0.7,0,1,0); tl.Position=UDim2.new(0,12,0,0)
+tl.BackgroundTransparency=1; tl.Text=t
+tl.TextColor3=Color3.new(1,1,1)
+tl.Font=Enum.Font.Gotham; tl.TextSize=14
+tl.TextXAlignment=Enum.TextXAlignment.Left
+local tb=Instance.new("TextButton",c)
+tb.Size=UDim2.new(0,45,0,22); tb.Position=UDim2.new(1,-57,0.5,-11)
+tb.BackgroundColor3=Color3.new(0.24,0.24,0.24); tb.Text=""; tb.BorderSizePixel=0
+Instance.new("UICorner",tb).CornerRadius=UDim.new(1,0)
+local kn=Instance.new("Frame",tb)
+kn.Size=UDim2.new(0,18,0,18); kn.Position=UDim2.new(0,2,0.5,-9)
+kn.BackgroundColor3=Color3.new(1,1,1); kn.BorderSizePixel=0
+Instance.new("UICorner",kn).CornerRadius=UDim.new(1,0)
+local st=F[d]
+if st==nil then st=false; F[d]=st end
+if st then tb.BackgroundColor3=Color3.new(1,0,0); kn.Position=UDim2.new(1,-20,0.5,-9) end
+if cb then pcall(cb,st) end
+track(tb.MouseButton1Click:Connect(function()
+st=not st; F[d]=st
+if st then tb.BackgroundColor3=Color3.new(1,0,0); kn.Position=UDim2.new(1,-20,0.5,-9)
+else tb.BackgroundColor3=Color3.new(0.24,0.24,0.24); kn.Position=UDim2.new(0,2,0.5,-9) end
+if cb then pcall(cb,st) end
+end))
+end
+function so.Slider(t,d,mn,mx,default,cb)
+local c=so.CC2(55)
+local tl=Instance.new("TextLabel",c)
+tl.Size=UDim2.new(0.7,0,0,20); tl.Position=UDim2.new(0,12,0,5)
+tl.BackgroundTransparency=1; tl.TextColor3=Color3.new(1,1,1)
+tl.Font=Enum.Font.Gotham; tl.TextSize=13
+tl.TextXAlignment=Enum.TextXAlignment.Left
+local sb=Instance.new("TextButton",c)
+sb.Size=UDim2.new(1,-24,0,16); sb.Position=UDim2.new(0,12,0,30)
+sb.BackgroundColor3=Color3.new(0.24,0.24,0.24); sb.Text=""; sb.BorderSizePixel=0
+sb.AutoButtonColor=false
+Instance.new("UICorner",sb).CornerRadius=UDim.new(0,8)
+local val=tonumber(F[d]) or default
+if val<mn then val=mn end
+if val>mx then val=mx end
+F[d]=val
+local rel=math.clamp((val-mn)/(mx-mn),0,1)
+local fill=Instance.new("Frame",sb)
+fill.Size=UDim2.new(rel,0,1,0); fill.BackgroundColor3=Color3.new(1,0,0)
+fill.BorderSizePixel=0
+Instance.new("UICorner",fill).CornerRadius=UDim.new(0,8)
+tl.Text=t..": "..tostring(val)
+if cb then pcall(cb,val) end
+local sdrag=false
+local function upd(inp)
+local r=math.clamp((inp.Position.X-sb.AbsolutePosition.X)/sb.AbsoluteSize.X,0,1)
+val=math.floor(mn+(mx-mn)*r+0.5)
+fill.Size=UDim2.new(r,0,1,0); tl.Text=t..": "..tostring(val)
+F[d]=val
+if cb then pcall(cb,val) end
+end
+track(sb.InputBegan:Connect(function(inp)
+if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then
+sdrag=true; upd(inp)
+end
+end))
+track(sb.InputEnded:Connect(function(inp)
+if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then sdrag=false end
+end))
+track(UIS.InputChanged:Connect(function(inp)
+if sdrag and (inp.UserInputType==Enum.UserInputType.MouseMovement or inp.UserInputType==Enum.UserInputType.Touch) then upd(inp) end
+end))
+end
+function so.TextBox(t,d,default,cb)
+local c=so.CC2(60)
+local tl=Instance.new("TextLabel",c)
+tl.Size=UDim2.new(0.7,0,0,20); tl.Position=UDim2.new(0,12,0,5)
+tl.BackgroundTransparency=1; tl.Text=t
+tl.TextColor3=Color3.new(1,1,1)
+tl.Font=Enum.Font.Gotham; tl.TextSize=13
+tl.TextXAlignment=Enum.TextXAlignment.Left
+local tb=Instance.new("TextBox",c)
+tb.Size=UDim2.new(1,-24,0,26); tb.Position=UDim2.new(0,12,0,28)
+tb.BackgroundColor3=Color3.new(0.18,0.18,0.18); tb.TextColor3=Color3.new(1,1,1)
+tb.Text=tostring(F[d] or default or ""); tb.Font=Enum.Font.Gotham
+tb.TextSize=13; tb.BorderSizePixel=0; tb.ClearTextOnFocus=false
+Instance.new("UICorner",tb).CornerRadius=UDim.new(0,6)
+if F[d]==nil then F[d]=default end
+track(tb.FocusLost:Connect(function()
+F[d]=tb.Text
+if cb then pcall(cb,tb.Text) end
+end))
+end
+return so
+end
+return tab
+end
+local fT=NewTab("Farm")
+local fS=fT.NewSection("Auto Farm")
+fS.Toggle("Fast Rep","FastRep")
+fS.Toggle("Auto Rebirth","AutoRebirth")
+fS.Toggle("Auto Egg","AutoEgg")
+fS.Toggle("Auto Wheel","AutoWheel")
+local cT=NewTab("Combat")
+local cS=cT.NewSection("PvP")
+cS.Toggle("Kill Aura","KillAura")
+cS.Slider("Range","Range",5,100,25)
+local mT=NewTab("Misc")
+local mS=mT.NewSection("Player")
+mS.Toggle("Anti AFK","AntiAFK")
+mS.Toggle("Anti Ragdoll","AntiRagdoll")
+mS.Toggle("No Clip","NoClip")
+mS.Toggle("Walk Water","WalkWater")
+mS.Toggle("Sky Farm","SkyFarm")
+mS.Toggle("Full Bright","FullBright",function(v)
+if v then
+LIGHT.Ambient=Color3.new(1,1,1)
+LIGHT.OutdoorAmbient=Color3.new(1,1,1)
+LIGHT.Brightness=3
+LIGHT.FogEnd=1e6
+LIGHT.GlobalShadows=false
+else
+RestoreLight()
+end
+end)
+mS.Toggle("Remove Attack Anim","RemoveAnim")
+mS.Slider("Walk Speed","SpeedValue",16,200,16,function(v)
+local h=GetHum(); if h then h.WalkSpeed=v end
+end)
+local aT=NewTab("Auto")
+local aS=aT.NewSection("Upgrade & Sell")
+aS.Toggle("Auto Sell","AutoSell")
+aS.Toggle("Auto Upgrade Strength","AutoUpgradeStr")
+aS.Toggle("Auto Upgrade Durability","AutoUpgradeDur")
+aS.Toggle("Auto Upgrade Agility","AutoUpgradeAgi")
+aS.Toggle("Auto Crystal","AutoCrystal")
+aS.TextBox("Crystal Name","CrystalName","Blue Crystal")
+track(UIS.InputBegan:Connect(function(inp,gp)
+if gp then return end
+if inp.KeyCode==Enum.KeyCode.RightShift and Main and Main.Parent then
+Main.Visible=not Main.Visible
+end
+end))
+Notify("KhoiMain da load! Bam RightShift de an/hien UI.")
